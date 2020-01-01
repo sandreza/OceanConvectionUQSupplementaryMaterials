@@ -1,9 +1,12 @@
 include("../src/LocalOceanUQSupplementaryMaterials.jl")
 include("../scripts/utils.jl")
 
-use_covariance_estimate = false
-for resolution in resolutions[1:1]
-    for case in cases[3:34]
+use_covariance_estimate = true
+case_range = 3:34
+resolution_range = 1:1
+const ensemble_size = 10^5
+for resolution in resolutions[resolution_range]
+    for case in cases[case_range]
         # construct filename
         filename = pwd() * "/LES/" * case * "_profiles.jld2"
         # construct default loss function
@@ -31,7 +34,7 @@ for resolution in resolutions[1:1]
         nll(𝑪) = ℒ(𝑪) / ℒ⁰
         filename = pwd() * "/mcmc_data/" * case * resolution_label * "_mcmc.jld2"
         # parameters for mcmc
-        nt = 100000
+        nt = ensemble_size
         frequency = 100
         # define proposal matrix, 5% of default value
         proposal = CoreFunctionality.closure_proposal(σ, left_bounds = left_bounds, right_bounds = right_bounds)
