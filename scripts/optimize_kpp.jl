@@ -6,12 +6,12 @@ parameter_continuation = true
 random_starting_point_1 = false
 random_starting_point_2 = false
 σ = default_𝑪 * 0.5 # more liberal searching for optimal parameters
-case_range = 3:34
+case_range = 1:1
 for resolution in resolutions[1:1]
     # reset default parameters if parameter continuation is used
     default_𝑪 = [0.1, 6.33, 8.36, 3.19]
     # default_𝑪 = [0.11803164331592443, 3.7246545857676954, 0.35191154207167974, 6.225750233165317] #best for 1
-    #default_𝑪 = [0.04874744540063653, 3.760819427517219, 0.1814772890705244, 11.98844037974979]
+    # default_𝑪 = [0.04874744540063653, 3.760819427517219, 0.1814772890705244, 11.98844037974979]   #best for 2
     σ = default_𝑪 * 0.5
     if random_starting_point_1
         default_𝑪[1] = rand()
