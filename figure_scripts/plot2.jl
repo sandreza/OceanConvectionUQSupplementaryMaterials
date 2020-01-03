@@ -1,10 +1,10 @@
 include("../src/LocalOceanUQSupplementaryMaterials.jl")
 include("../scripts/utils.jl")
-using Plots, Printf, Statistics, JLD2
+using Plots, Printf, Statistics, JLD2, MCMCDiagnostics
 
 #optimized vs nonoptimized kpp figures
 
-save_figures = true
+save_figures = false
 
 # choose case
 case = cases[1]
@@ -33,11 +33,23 @@ chain = mcmc_data["𝑪"]
 e1 = mcmc_data["ε"]
 e2 = mcmc_data["proposal_ε"]
 acceptance_rate = sum(e1 .== e2) / length(e1)
+println("the acceptance rate was")
+println(acceptance_rate)
 indmin = argmin(e1)
 close(mcmc_data)
+ess = randn(4)
+for i in 1:4
+    # one million is a bit much
+    x1 = chain[i,1:end]
+    variance_x1 = var(x1)
+    ess[i] = effective_sample_size(x1, variance_x1)
+end
+println("the effective sample size was")
+println(ess)
+
 seconds_in_a_day = 86400
 # parameters to loop over
-labels = ["Default KPP", "Optimized KPP", "Mean KPP", "Median KPP"]
+labels = ["Default", "Mode", "Mean", "Median"]
 default_𝑪 = [0.1, 6.33, 1.36, 3.19]
 #default_𝑪 = [0.0760809666611145; 4.342473912404762; 2.1630355831002954; 5.57111619953263] # from megachain
 optimal_𝑪 = chain[:, indmin]

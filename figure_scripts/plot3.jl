@@ -13,7 +13,7 @@ chain, e1, e2 = get_chain(case, resolution[1])
 
 # marginal pdfs
 m,n = size(chain)
-p = marginal_pdfs(chain[:,1:(n-1)], left_bounds, right_bounds, parameter_dictionary, bins = 100)
+p = marginal_pdfs(chain[:,1:(n-1)], left_bounds, right_bounds, parameter_dictionary, bins = 20)
 p1 = plot(p...)
 
 if save_figures == true
@@ -25,7 +25,7 @@ names = ["Surface Layer Fraction", "Nonlocal Amplitude", "Diffusivity Amplitude"
 prob = 0.95
 left_bounds_j = a_quantile(chain, 1-prob)
 right_bounds_j = a_quantile(chain, prob)
-p = joint_pdfs(chain, left_bounds_j, right_bounds_j, parameter_dictionary, bins = 150)
+p = joint_pdfs(chain, left_bounds_j, right_bounds_j, parameter_dictionary, bins = 50)
 p1 = plot(p[[5,3,6,2]]...)
 
 if save_figures == true
@@ -41,12 +41,12 @@ indmax = argmax(e1)
 optimal_𝑪 = chain[:,indmin]
 
 # means and standard deviations
-μ, σ = calculate_partial_statistics(chain[:,1:10^6])
+μ, σ = calculate_partial_statistics(chain[:,1:end])
 # index label
-ind = 3
+ind = 4
 pμ, pσ = plot_partial_statistics(μ, σ; ind = ind);
 plot(pμ)
 plot(pσ)
 # error in time and histogram
 plot(e1)
-histogram(e1[1:(10^6)], xlabel = "error", bins = 50, legend = false, normalize = true, ylabel = "pdf")
+histogram(e1[1:end], xlabel = "error", bins = 50, legend = false, normalize = true, ylabel = "pdf")

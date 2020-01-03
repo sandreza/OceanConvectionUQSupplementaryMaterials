@@ -9,7 +9,7 @@ random_starting_point_2 = false
 case_range = 1:1
 for resolution in resolutions[1:1]
     # reset default parameters if parameter continuation is used
-    default_𝑪 = [0.1, 6.33, 8.36, 3.19]
+    # default_𝑪 = [0.1, 6.33, 1.36, 3.19]
     # default_𝑪 = [0.11803164331592443, 3.7246545857676954, 0.35191154207167974, 6.225750233165317] #best for 1
     # default_𝑪 = [0.04874744540063653, 3.760819427517219, 0.1814772890705244, 11.98844037974979]   #best for 2
     σ = default_𝑪 * 0.5
@@ -44,7 +44,7 @@ for resolution in resolutions[1:1]
         # random walk optimization
         println("random walk")
         # optimal_𝑪 = CoreFunctionality.optimize(default_𝑪, nll; nt = 1000, restart = 2, proposal = proposal, rescale = true, freq = 100, scale = default_ℒ)
-        optimal_𝑪, Σ = CoreFunctionality.optimize_and_estimate_proposal(default_𝑪, nll, left_bounds, right_bounds, nt = 2000, restart = 3, proposal = [], filename = [], rescale = true, freq = 100, verbose = true)
+        optimal_𝑪, Σ = CoreFunctionality.optimize_and_estimate_proposal(default_𝑪, nll, left_bounds, right_bounds, nt = 1000, restart = 3, proposal = [], filename = [], rescale = true, freq = 100, verbose = true)
 
         default_ℒ = nll(default_𝑪)
         optimal_ℒ = nll(optimal_𝑪)

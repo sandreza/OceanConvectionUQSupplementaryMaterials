@@ -6,7 +6,7 @@ parameter_continuation = false
 σ = default_𝑪 * 0.2 # more liberal searching for optimal parameters
 case_range = 20:1:34
 case_range = [1,6,7,8,9,10]
-case_range = 16:34
+case_range = 2:2
 #case_range = 7:10
 for resolution in resolutions[1:1]
     for case in cases[case_range]
@@ -26,12 +26,17 @@ for resolution in resolutions[1:1]
 
         NN = sqrt(les.α * les. g * les.bottom_T)
         default_𝑪 = [1e-4, 3.5 * 1.0, 10.0, 0.0, 0.375, NN]
+        default_𝑪 = [0.1, 3.5 * 1.0, 1.0, 0.0, 0.375, NN]
+        default_𝑪 = [0.005741998337334633, 3.629207116893695, 1.1392751590144323, 0.0, 0.40974149273298843, NN]
         println(default_𝑪)
-        σ = default_𝑪 * 0.05
-        σ[6] = 0.025
+        σ = default_𝑪 * 0.5
+        σ[6] = eps(1.0)
+        #=
         left_bounds = [0.0, 3.0, 5.0, 0.0, 0.0, NN]
         right_bounds = [0.01, 5.0, 10.0, eps(1.0), 1.0, NN + eps(1.0)]
-
+        =#
+        left_bounds = [0.0, 0.0, 0.0, 0.0, 0.0, NN]
+        right_bounds = [0.01, 8.0, 10.0, eps(1.0), 1.0, NN + eps(1.0)]
 
         proposal = CoreFunctionality.closure_proposal(σ, left_bounds = left_bounds, right_bounds = right_bounds)
         # for reproducibility set random seed

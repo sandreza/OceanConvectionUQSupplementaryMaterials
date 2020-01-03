@@ -8,7 +8,7 @@ use_covariance_estimate = true
 #σ[6] = 0.025
 case_range = 3:1:34
 case_range = [1,6,7,8,9,10]
-case_range = 16:34
+case_range = 1:2
 for resolution in resolutions[1:1]
     for case in cases[case_range]
         # construct filename
@@ -46,8 +46,12 @@ for resolution in resolutions[1:1]
         # define proposal matrix, 5% of default value
         NN = sqrt(les.α * les. g * les.bottom_T)
         σ = initial_𝑪 * 0.1
+        #=
         left_bounds = [0.0, 3.0, 5.0, 0.0, 0.0, NN]
-        right_bounds = [0.2, 5.0, 10.0, eps(1.0), 1.0, NN + eps(1.0)]
+        right_bounds = [0.01, 5.0, 10.0, eps(1.0), 1.0, NN + eps(1.0)]
+        =#
+        left_bounds = [0.0, 0.0, 0.0, 0.0, 0.0, NN]
+        right_bounds = [0.01, 8.0, 10.0, eps(1.0), 1.0, NN + eps(1.0)]
         proposal = CoreFunctionality.closure_proposal(σ, left_bounds = left_bounds, right_bounds = right_bounds)
         if use_covariance_estimate
             proposal = CoreFunctionality.closure_proposal(Σ, left_bounds = left_bounds, right_bounds = right_bounds)

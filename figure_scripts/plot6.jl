@@ -77,7 +77,7 @@ end
 # parameters to loop over
 # show everything in case 1 scenario
 p_case1 = []
-labels = ["Optimal 1", "Optimal 2", "Compromise", "Compromise 2"]
+labels = ["Mode 1", "Mode 2", "Compromise", "Compromise 2"]
 parameter_list =[𝑪1, 𝑪2, 𝑪3, 𝑪4]
 plot()
 for j in 1:4
@@ -97,7 +97,7 @@ end
 ###
 # show everything in case 2 scenario
 p_case2 = []
-labels = ["Optimal 1", "Optimal 2", "Compromise", "Compromise 2"]
+labels = ["Mode 1", "Mode 2", "Compromise", "Compromise 2"]
 parameter_list =[𝑪1, 𝑪2, 𝑪3, 𝑪4]
 plot()
 for j in 1:4

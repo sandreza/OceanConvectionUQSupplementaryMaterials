@@ -2,9 +2,9 @@ include("../src/LocalOceanUQSupplementaryMaterials.jl")
 include("../scripts/utils.jl")
 
 use_covariance_estimate = true
-case_range = 3:34
+case_range = 1:2
 resolution_range = 1:1
-const ensemble_size = 10^5
+const ensemble_size = 10^3
 for resolution in resolutions[resolution_range]
     for case in cases[case_range]
         # construct filename
