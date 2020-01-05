@@ -99,6 +99,7 @@ if mcmc_compromise == true
     # define proposal matrix, 5% of default value
     proposal = CoreFunctionality.closure_proposal(σ, left_bounds = left_bounds, right_bounds = right_bounds)
     if use_covariance_estimate
+        #covariance estimate, seems to give more independent samples
         proposal = CoreFunctionality.closure_proposal(Σ, left_bounds = left_bounds, right_bounds = right_bounds)
     end
     # now markov chain
