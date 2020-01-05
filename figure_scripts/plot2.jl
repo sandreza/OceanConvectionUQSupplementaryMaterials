@@ -7,7 +7,7 @@ using Plots, Printf, Statistics, JLD2, MCMCDiagnostics
 save_figures = false
 
 # choose case
-case = cases[1]
+case = cases[3]
 
 # get LES
 filename = pwd() * "/LES/" * case * "_profiles.jld2"
