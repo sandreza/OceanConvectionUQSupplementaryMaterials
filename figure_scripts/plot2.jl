@@ -4,10 +4,10 @@ using Plots, Printf, Statistics, JLD2, MCMCDiagnostics
 
 #optimized vs nonoptimized kpp figures
 
-save_figures = false
+save_figures = true
 
 # choose case
-case = cases[3]
+case = cases[1]
 
 # get LES
 filename = pwd() * "/LES/" * case * "_profiles.jld2"

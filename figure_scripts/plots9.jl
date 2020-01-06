@@ -47,7 +47,7 @@ chain4 = combine(chain1, chain2)
 case_range1 = 1:(10^5-1)
 case_range2 = copy(case_range1)
 case_range4 = (5 * 10^4 +2) : (1 * 10^5 - 1 + 5 * 10^4)
-index = 1
+index = 4
 histogram(chain1[index,case_range1], normalize = true, alpha = 0.4, xlims = (left_bounds[index], right_bounds[index]), xlabel = parameter_dictionary[index], bins = 50, legend = true, ylabel = "pdf", label = "Case 1")
 histogram!(chain2[index,case_range2], normalize = true, alpha = 0.4, label = "Case 2")
 histogram!(chain4[index,case_range4], normalize = true, alpha = 0.4, label = "Compromise")

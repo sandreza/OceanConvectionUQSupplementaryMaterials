@@ -41,7 +41,7 @@ function a_quantile(array, prob)
 end
 
 # Define parameter dictonary
-names = ["Surface Layer Fraction", "Nonlocal Amplitude", "Diffusivity Amplitude", "Unresolved Shear"]
+names = ["Surface Layer Fraction", "Nonlocal Amplitude", "Diffusivity Amplitude", "Entrainment Coefficient"]
 values = [1,2,3,4]
 parameter_dictionary = Dict(zip(values, names))
 

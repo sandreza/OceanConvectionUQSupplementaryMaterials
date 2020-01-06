@@ -6,6 +6,7 @@ include("../figure_scripts/utils.jl")
 
 save_figures = true
 
+use_median = true
 resolution = resolutions[1]
 # define things for forward map
 N = resolution[1]
@@ -22,6 +23,10 @@ subsample = 1:1:length(les1.t)
 chain1, tmp1, tmp2 = get_chain(case, resolution[1])
 indmin1 = argmin(tmp1)
 𝑪1 = chain1[:,indmin1]
+if use_median
+    𝑪1 = median(chain1, dims = 2)[:]
+    println("median 1 is $𝑪1")
+end
 # get LES 2
 case = cases[2]
 filename = pwd() * "/LES/" * case * "_profiles.jld2"
@@ -32,11 +37,15 @@ subsample = 1:1:length(les2.t)
 chain2, tmp1, tmp2 = get_chain(case, resolution[1])
 indmin2 = argmin(tmp1)
 𝑪2 = chain2[:,indmin2]
-
+if use_median
+    𝑪2 = median(chain2, dims = 2)[:]
+    println("median 2 is $𝑪1")
+end
 # get compromise data
 case = "compromise"
 chain3, e1, e2 = get_chain(case, resolution[1])
 indmin3 = argmin(e1)
+chain3 = chain3[:,1:229901]
 𝑪3 = chain3[:,indmin3]
 
 # create other compromise distribution
@@ -55,7 +64,7 @@ scale = (c+d) / (a+b)
 ###
 case_range1 = 1:(10^6-1)
 case_range2 = copy(case_range1)
-case_range3 = 1:(10^6-1)
+case_range3 = 1:1:229901
 case_range4 = (5 * 10^5 +2) : (1 * 10^6 - 1 + 5 * 10^5)
 index = 4
 histogram(chain1[index,case_range1], normalize = true, alpha = 0.4, xlims = (left_bounds[index], right_bounds[index]), xlabel = parameter_dictionary[index], bins = 50, legend = true, ylabel = "pdf", label = "Case 1")
@@ -78,6 +87,9 @@ end
 # show everything in case 1 scenario
 p_case1 = []
 labels = ["Mode 1", "Mode 2", "Compromise", "Compromise 2"]
+if use_median
+    labels = ["Median 1", "Median 2", "Compromise", "Compromise 2"]
+end
 parameter_list =[𝑪1, 𝑪2, 𝑪3, 𝑪4]
 plot()
 for j in 1:4
@@ -98,6 +110,9 @@ end
 # show everything in case 2 scenario
 p_case2 = []
 labels = ["Mode 1", "Mode 2", "Compromise", "Compromise 2"]
+if use_median
+    labels = ["Median 1", "Median 2", "Compromise", "Compromise 2"]
+end
 parameter_list =[𝑪1, 𝑪2, 𝑪3, 𝑪4]
 plot()
 for j in 1:4

@@ -10,10 +10,13 @@ resolution = resolutions[1]
 
 # get chain
 chain, e1, e2 = get_chain(case, resolution[1])
+Cᴿ = 0.3
+chain[4,:] *= Cᴿ #mutliply by the critical richardson number, for visualizing pdfs
+right_bounds[4] *= Cᴿ
 
 # marginal pdfs
 m,n = size(chain)
-p = marginal_pdfs(chain[:,1:(n-1)], left_bounds, right_bounds, parameter_dictionary, bins = 20)
+p = marginal_pdfs(chain[:,1:(n-1)], left_bounds, right_bounds, parameter_dictionary, bins = 50)
 p1 = plot(p...)
 
 if save_figures == true
@@ -21,7 +24,6 @@ if save_figures == true
 end
 
 # joint pdfs, reminders of bounds
-names = ["Surface Layer Fraction", "Nonlocal Amplitude", "Diffusivity Amplitude", "Unresolved Shear"]
 prob = 0.95
 left_bounds_j = a_quantile(chain, 1-prob)
 right_bounds_j = a_quantile(chain, prob)
@@ -49,4 +51,4 @@ plot(pμ)
 plot(pσ)
 # error in time and histogram
 plot(e1)
-histogram(e1[1:end], xlabel = "error", bins = 50, legend = false, normalize = true, ylabel = "pdf")
+histogram(e1[1:(end-1)], xlabel = "error", bins = 50, legend = false, normalize = true, ylabel = "pdf")

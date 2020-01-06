@@ -2,12 +2,16 @@ include("../src/LocalOceanUQSupplementaryMaterials.jl")
 include("../scripts/utils.jl")
 include("../figure_scripts/utils.jl")
 
-save_figures = false
-
+save_figures = true
+rescale_4 = true
+Cᴿ = 0.3
 #trends plots
 
 case_range = 3:34
-y_range = (1,16)
+y_range = (0,16)
+if rescale_4
+    y_range = (0, 16* Cᴿ)
+end
 std_amplitude = 1
 chains = []
 optimal_values = []
@@ -29,6 +33,9 @@ for resolution in resolutions[1:3]
         stratification = les.α * les.g * les.bottom_T
         push!(stratifications, stratification)
         chain, tmp1, tmp2 = get_chain(case, resolution[1])
+        if rescale_4
+            chain[4,:] *= Cᴿ
+        end
         push!(chains, chain)
         optimal_value = chain[p_index, argmin(tmp1)]
         push!(optimal_values, optimal_value)
@@ -52,6 +59,9 @@ p_index = 4
 
 case_range = 3:34
 y_range = (0, 16.0)
+if rescale_4
+    y_range = (0, 16* Cᴿ)
+end
 std_amplitude = 1
 for resolution in resolutions[1:3]
     chains = []
@@ -65,6 +75,9 @@ for resolution in resolutions[1:3]
         stratification = les.α * les.g * les.bottom_T
         push!(stratifications, stratification)
         chain, tmp1, tmp2 = get_chain(case, resolution[1])
+        if rescale_4
+            chain[4,:] *= Cᴿ
+        end
         push!(chains, chain)
         optimal_value = chain[p_index, argmin(tmp1)]
         push!(optimal_values, optimal_value)
@@ -100,6 +113,9 @@ p_index = 4
 
 case_range = 3:34
 y_range = (0,16)
+if rescale_4
+    y_range = (0, 16* Cᴿ)
+end
 std_amplitude = 1
 confidence_interval = 0.95
 for resolution in resolutions[1:1]
@@ -114,6 +130,9 @@ for resolution in resolutions[1:1]
         stratification = les.α * les.g * les.bottom_T
         push!(stratifications, stratification)
         chain, tmp1, tmp2 = get_chain(case, resolution[1])
+        if rescale_4
+            chain[4,:] *= Cᴿ
+        end
         push!(chains, chain)
         #optimal_value = chain[p_index, argmin(tmp1)]
         optimal_value = median(chain[p_index,:])
@@ -139,6 +158,9 @@ end
 plot()
 p_index = 4
 range_list = [(0,1), (0,8),(0,12), (0,16)]
+if rescale_4
+    range_list = [(0,1), (0,8),(0,12), (0, 16* Cᴿ)]
+end
 case_range = 3:34   # 1:2 and 3:34
 y_range = range_list[p_index]
 std_amplitude = 1
@@ -158,6 +180,9 @@ for resolution in resolutions[1:1]
         stratification = les.α * les.g * les.bottom_T
         push!(stratifications, stratification)
         chain, tmp1, tmp2 = get_chain(case, resolution[1])
+        if rescale_4
+            chain[4,:] *= Cᴿ
+        end
         push!(chains, chain)
         optimal_value = chain[p_index, argmin(tmp1)]
         median_value = median(chain[p_index,:])
@@ -178,7 +203,7 @@ for resolution in resolutions[1:1]
     res_string = @sprintf("%.2f ", 100/resolution[1])
     per_string = @sprintf("%.0f", confidence_interval* 100)
     p1 = scatter!(N², C2, xlabel = "Background Stratification, N² [1/s²]", ylabel = names[p_index], legend = :topleft, yerror = range_values, ylims = y_range, label = "Median values at " * res_string * "meter resolution")
-    p1  = scatter!(N², C, label = "Optimal values at " * res_string * "meter resolution", shape = :star5, legend = :topleft, title = "Modes, Medians, and " * per_string * "% Confidence Intervals", grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
+    p1  = scatter!(N², C, label = "Optimal values at " * res_string * "meter resolution", shape = :star5, legend = :topleft, title = "Modes, Medians, and " * per_string * "% Probability Intervals", grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
     display(p1)
     if save_figures == true
         savefig(p1, pwd() * "/figures/figure_7_alternative3.png")
@@ -193,6 +218,9 @@ end
 
 p_index = 4
 range_list = [(0,1), (0,8),(0,6), (0,16)]
+if rescale_4
+    range_list = [(0,1), (0,8),(0,6), (0,16*Cᴿ)]
+end
 case_range = 3:34   # 1:2 and 3:34
 
 std_amplitude = 1
@@ -214,6 +242,9 @@ for p_index in [1,2,3,4]
         stratification = les.α * les.g * les.bottom_T
         push!(stratifications, stratification)
         chain, tmp1, tmp2 = get_chain(case, resolution[1])
+        if rescale_4
+            chain[4,:] *= Cᴿ
+        end
         push!(chains, chain)
         optimal_value = chain[p_index, argmin(tmp1)]
         median_value = median(chain[p_index,:])

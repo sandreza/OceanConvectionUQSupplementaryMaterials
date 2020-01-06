@@ -5,7 +5,7 @@ save_figures = false
 plot()
 p_index = 5
 range_list = [(0,0.02), (3,5),(1,2), (0,1), (0,1)]
-case_range = 3:1:34   # 1:2 and 3:34
+case_range = 3:1:32   # 1:2 and 3:34. 32:34 isn't finished
 
 y_range = range_list[p_index]
 std_amplitude = 1
