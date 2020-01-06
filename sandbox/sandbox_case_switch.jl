@@ -1,11 +1,11 @@
-include("./src/LocalOceanUQSupplementaryMaterials.jl")
-include("./scripts/utils.jl")
-include("./figure_scripts/utils.jl")
+include("../src/LocalOceanUQSupplementaryMaterials.jl")
+include("../scripts/utils.jl")
+include("../figure_scripts/utils.jl")
 
 # compromise functions
 
-save_figures = true
-
+save_figures = false
+use_median = true
 resolution = resolutions[1]
 # define things for forward map
 N = resolution[1]
@@ -30,8 +30,10 @@ e2 = mcmc_data["proposal_ε"]
 indmin1 = argmin(e1)
 chain1 = mcmc_data["𝑪"]
 𝑪1 = chain1[:,indmin1]
-𝑪1 = median(chain1, dims = 2)[:]
-println("median 1 is $𝑪1")
+if use_median
+    𝑪1 = median(chain1, dims = 2)[:]
+    println("median 1 is $𝑪1")
+end
 ### now fo rcase 2
 case = cases[ind_case_2]
 filename = pwd() * "/LES/" * case * "_profiles.jld2"
@@ -47,8 +49,10 @@ e2 = mcmc_data["proposal_ε"]
 indmin2 = argmin(e1)
 chain2 = mcmc_data["𝑪"]
 𝑪2 = chain2[:,indmin2]
-𝑪2 = median(chain2, dims = 2)[:]
-println("median 2 is $𝑪2")
+if use_median
+    𝑪2 = median(chain2, dims = 2)[:]
+    println("median 2 is $𝑪2")
+end
 # create other compromise distribution
 chain4 = combine(chain1, chain2)
 𝑪4 = median(chain4,dims=2)[:] #other choice of compromise
@@ -78,7 +82,10 @@ end
 # parameters to loop over
 # show everything in case 1 scenario
 p_case1 = []
-labels = ["Median 1", "Median 2",  "Compromise"]
+labels = ["Mode 1", "Mode 2",  "Compromise"]
+if use_median
+    labels = ["Median 1", "Median 2",  "Compromise"]
+end
 #𝑪1[1] = 1e-4
 #𝑪2[2] = 3.5
 #𝑪2[5] = 0.375
@@ -108,7 +115,10 @@ end
 ###
 # show everything in case 2 scenario
 p_case2 = []
-labels = ["Median 1", "Median 2", "Compromise"]
+labels = ["Mode 1", "Mode 2",  "Compromise"]
+if use_median
+    labels = ["Median 1", "Median 2",  "Compromise"]
+end
 parameter_list =[𝑪1, 𝑪2, 𝑪4]
 𝑪1[6] = NN2
 𝑪2[6] = NN2
@@ -155,148 +165,3 @@ p5 = plot(p_case1[3], p_case2[3])
 if save_figures == true
     savefig(p5, pwd() * "/figures/figure_11_alternative4.png")
 end
-
-# special = p3
-#plot(special, p4)
-#plot(tmp)
-
-
-####
-using OceanTurb
-# Build the model with a Backward Euler timestepper
-𝑪 = [0.11803164331592443, 3.7246545857676954, 0.35191154207167974, 6.225750233165317]
-parameters = KPP.Parameters( CSL = 𝑪[1], CNL = 𝑪[2], Cb_T = 𝑪[3], CKE = 𝑪[4])
-constants = Constants(Float64; α = les.α , β = les.β, ρ₀= les.ρ, cP=les.cᵖ, f=les.f⁰, g=les.g)
-N = 16
-Δt = 600.0
-model = KPP.Model(N=N, L=les.L, stepper=:BackwardEuler, constants = constants) #, parameters = parameters)
-
-# get average of initial condition of LES
-T⁰ = avg(les.T⁰, N)
-# set equal to initial condition of parameterization
-model.solution.T[1:N] = copy(T⁰)
-# Set boundary conditions
-model.bcs.T.top = FluxBoundaryCondition(les.top_T)
-model.bcs.T.bottom = GradientBoundaryCondition(les.bottom_T)
-# set aside memory
-if subsample != 1
-    time_index = subsample
-else
-    time_index = 1:length(les.t)
-end
-Nt = length(les.t[time_index])
-𝒢 = zeros(Nt)
-𝒢1 = zeros(N, Nt)
-
-# loop the model
-ti = collect(time_index)
-for i in 1:Nt
-    t = les.t[ti[i]]
-    run_until!(model, Δt, t)
-    @. 𝒢1[:,i] = model.solution.T[1:N]
-    𝒢[i] = model.state.h
-end
-# 60 - 80
-z = collect(model.grid.zc)
-scatter(ti, 𝒢)
-scatter(𝒢1[:, 80], z, legend = false)
-
-
-
-###
-calc_prior = false
-const number_of_ensembles = 10^6
-const skip = 100
-for case in cases[1:1]
-    for resolution in resolutions[1:1]
-        # construct filename
-        filename = pwd() * "/LES/" * case * "_profiles.jld2"
-        # load les
-        les = CoreFunctionality.OceananigansData(filename)
-        # construct default loss function
-        N = resolution[1]
-        Δt = resolution[2]
-        # define the forward map
-        zᵖ = zeros(N)
-        #calculate every hour
-        subsample = 1:6:length(les.t)
-        # define the forward map
-        𝒢 = CoreFunctionality.closure_free_convection_ml_depth(N, Δt, les, subsample = subsample, grid = zᵖ)
-        println("-------------------")
-        println("For case $case ")
-        println("and resolution " * string(resolution[1]))
-        resolution_label = "_res_" * string(resolution[1])
-        filename = pwd() * "/mcmc_data/" * case * resolution_label * "_mcmc.jld2"
-        mcmc_data = jldopen(filename, "r")
-        𝑪 = mcmc_data["𝑪"]
-        close(mcmc_data)
-        Φ = 𝒢(𝑪)
-        ϕmin = 0.0
-        ϕmax = 100.0
-        Δϕ = (ϕmax - ϕmin) / 1000
-        ϕrange = collect(ϕmin:Δϕ:ϕmax)
-        filename = pwd() * "/mcmc_data/" * case * resolution_label * "_uncertainty_propagation_ml.jld2"
-        CoreFunctionality.propagate_uncertainty(𝑪[:,1:skip:number_of_ensembles], 𝒢, field_range = ϕrange, filename = filename)
-        filename = pwd() * "/mcmc_data/" * case * resolution_label * "_domain.jld2"
-        println("done with posterior")
-        if calc_prior
-            # Now do it for the prior distribution
-            filename = pwd() * "/mcmc_data/" * "prior" * "_mcmc.jld2"
-            mcmc_data = jldopen(filename, "r")
-            𝑪 = mcmc_data["𝑪"]
-            close(mcmc_data)
-            filename = pwd() * "/mcmc_data/" * case * resolution_label * "_prior" * "_uncertainty_propagation_ml.jld2"
-            CoreFunctionality.propagate_uncertainty(𝑪[:,1:skip:number_of_ensembles], 𝒢, field_range = ϕrange, filename = filename)
-            println("done with prior")
-        end
-    end
-end
-
-###
-save_figures = false
-
-case = cases[1]
-resolution = resolutions[1]
-
-resolution_label = "_res_" * string(resolution[1])
-# get posterior data
-# filename = pwd() * "/mcmc_data/" * case * resolution_label * "_prior_uncertainty_propagation_ml.jld2"
-filename = pwd() * "/mcmc_data/" * case * resolution_label * "_uncertainty_propagation_ml.jld2"
-histogram_data = jldopen(filename, "r")
-h1 = histogram_data["h1"]
-close(histogram_data)
-
-m = length(h1[100][1].weights)
-n = length(h1)
-mat = randn(m,n)
-for i in 1:1:193
-    ind = i
-    normalization_constant = sum(h1[ind][1].weights)
-    tmp = h1[ind][1].weights / normalization_constant
-    @. mat[:,i] = tmp
-end
-ϕmin = 0.0
-ϕmax = 100.0
-Δϕ = (ϕmax - ϕmin) / 1000
-ϕrange = collect(ϕmin:Δϕ:ϕmax)
-ϕrange = (ϕrange[2:end] + ϕrange[1:end-1])./2
-trange = les.t[1:6:length(les.t)] ./ 86400
-p1 = heatmap(trange, ϕrange, log.(mat .+ eps(1.0))./log(10), ylabel = "Mixed Layer Depth [m]", xlabel = "days", title = "Mixed Layer Depth Uncertainty", clims = (-3, -0), ylims = (0, 75))
-display(p1)
-savefig(p1, pwd() * "/figures/ml_figure.png")
-println("at time ")
-println(trange[end-24])
-println("days")
-bools = h1[end-30][1].weights .> 8
-
-seen = ϕrange[bools]
-println(seen)
-max_seen = maximum(seen[1:end])
-min_seen = minimum(seen[1:end])
-println("The largest mixed layer depth is $max_seen")
-println("The smallest mixed layer depth is $min_seen")
-
-timelabel = @sprintf("%.1f", trange[end])
-tmp = ones(length(h1[end][1].weights))
-p1 = histogram(ϕrange, weights = h1[end][1].weights, bins = 200, norm = true, xlims = (65, 75), ylabel = "probability", xlabel = "mixed layer depth", title = "Mixed layer depth uncertainty at " * timelabel * " days", legend = false)
-savefig(p1, pwd() * "/figures/ml_figure_alternative.png")

@@ -1,7 +1,7 @@
 include("../src/LocalOceanUQSupplementaryMaterials.jl")
 include("../scripts/utils.jl")
 
-const number_of_ensembles = 10000
+const number_of_ensembles = 10^6
 const skip = 100
 for case in cases[1:1]
     for resolution in resolutions[1:1]
@@ -44,7 +44,7 @@ for case in cases[1:1]
         𝑪 = mcmc_data["𝑪"]
         close(mcmc_data)
         filename = pwd() * "/mcmc_data/" * case * resolution_label * "_prior" * "_uncertainty_propagation.jld2"
-        CoreFunctionality.propagate_uncertainty(𝑪[:,1:skip:number_of_ensembles], 𝒢, field_range = ϕrange, filename = filename)
+        CoreFunctionality.propagate_uncertainty(𝑪[:,1:skip:end], 𝒢, field_range = ϕrange, filename = filename)
         println("done with prior")
     end
 end
