@@ -3,6 +3,8 @@ include("../src/LocalOceanUQSupplementaryMaterials.jl")
 include("../scripts/utils.jl")
 using Plots, Printf, Statistics, JLD2
 
+# use PyPlot backend
+pyplot()
 # local vs nonlocal kpp figures
 
 save_figures = true
@@ -27,7 +29,7 @@ zᵖ = zeros(N)
 ℒᵗ = CoreFunctionality.closure_T_nll(𝒢, les; weight = 1, subsample = subsample, series=true, power = 2, f1 = mean, f2 = maximum )
 
 # get MCMC data
- 
+
 filename = pwd() * "/mcmc_data/" * case * resolution_label * "_mcmc.jld2"
 mcmc_data = jldopen(filename, "r")
 chain = mcmc_data["𝑪"]
@@ -81,7 +83,7 @@ for j in 1:3
     t = les.t ./ seconds_in_a_day
     inds = 30:length(les.t)
     loss = ℒᵗ(𝑪)
-    p2 = plot!(t[inds], sqrt.(loss[inds]), label = labels[j], legend = :topleft, xlabel = "days", ylabel = "Error [C]", grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
+    p2 = plot!(t[inds], sqrt.(loss[inds]), label = labels[j], legend = :topleft, xlabel = "days", ylabel = "Error " * celsius, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
     push!(loss_p, p2)
 end
 
@@ -102,7 +104,7 @@ anim = @animate for i in 1:20:length(les.t)
         loss = ℒᵗ(𝑪)
         Tᵖ = 𝒢(𝑪)
         loss_string = @sprintf("%.1e", sqrt(loss[i]))
-        p1 = plot(les.T[:,i], les.z, label = "LES", legend = :topleft, ylabel = "depth [m]", xlabel = "Temperature [C]", grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
+        p1 = plot(les.T[:,i], les.z, label = "LES", legend = :topleft, ylabel = "depth [m]", xlabel = "Temperature " * celsius, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
         p1 = scatter!(Tᵖ[:,i], zᵖ, label = labels[j], title = "Error = " * loss_string * " [C]", grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
         push!(p,p1)
     end

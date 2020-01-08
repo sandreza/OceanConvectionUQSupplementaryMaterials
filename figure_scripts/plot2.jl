@@ -1,7 +1,9 @@
 include("../src/LocalOceanUQSupplementaryMaterials.jl")
 include("../scripts/utils.jl")
+include("../figure_scripts/utils.jl")
 using Plots, Printf, Statistics, JLD2, MCMCDiagnostics
-
+# use PyPlot backend
+pyplot()
 #optimized vs nonoptimized kpp figures
 
 save_figures = true
@@ -65,8 +67,8 @@ for j in 1:4
     loss = ℒ(𝑪)
     Tᵖ = 𝒢(𝑪)
     loss_string = @sprintf("%.1e", sqrt(loss))
-    p1 = plot(les.T[:,end], les.z, label = "LES", legend = :topleft, ylabel = "depth [m]", xlabel = "Temperature [C]")
-    p1 = scatter!(Tᵖ[:,end], zᵖ, label = labels[j], title = "Error = " * loss_string * " [C]", markersize = 3, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
+    p1 = plot(les.T[:,end], les.z, label = "LES", legend = :topleft, ylabel = "depth [m]", xlabel = "Temperature " * celsius)
+    p1 = scatter!(Tᵖ[:,end], zᵖ, label = labels[j], title = "Error = " * loss_string * " " * celsius, markersize = 3, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
     display(p1)
     push!(p,p1)
 end
@@ -89,7 +91,7 @@ for j in 1:4
     t = les.t ./ seconds_in_a_day
     inds = 30:length(les.t)
     loss = ℒᵗ(𝑪)
-    p2 = plot!(t[inds], sqrt.(loss[inds]), label = labels[j], legend = :topleft, xlabel = "days", ylabel = "Error [C]", grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
+    p2 = plot!(t[inds], sqrt.(loss[inds]), label = labels[j], legend = :topleft, xlabel = "days", ylabel = "Error " * celsius, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
     push!(loss_p, p2)
 end
 
@@ -110,8 +112,8 @@ anim = @animate for i in 1:20:length(les.t)
         loss = ℒᵗ(𝑪)
         Tᵖ = 𝒢(𝑪)
         loss_string = @sprintf("%.1e", sqrt(loss[i]))
-        p1 = plot(les.T[:,i], les.z, label = "LES", legend = :topleft, ylabel = "depth [m]", xlabel = "Temperature [C]")
-        p1 = scatter!(Tᵖ[:,i], zᵖ, label = labels[j], title = "Error = " * loss_string * " [C]", markersize = 3, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
+        p1 = plot(les.T[:,i], les.z, label = "LES", legend = :topleft, ylabel = "depth [m]", xlabel = "Temperature " * celsius)
+        p1 = scatter!(Tᵖ[:,i], zᵖ, label = labels[j], title = "Error = " * loss_string * " " * celsius, markersize = 3, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
         push!(p,p1)
     end
     display(plot(p...))

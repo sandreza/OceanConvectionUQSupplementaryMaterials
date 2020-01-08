@@ -1,5 +1,7 @@
 using LaTeXStrings
 
+const celsius = L"[$^\circ$C]";
+itime = L"[s^{-2}]"
 # utils for plots
 """
 get_chain(case, N)

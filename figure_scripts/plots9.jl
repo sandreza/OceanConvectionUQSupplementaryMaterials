@@ -3,8 +3,10 @@ include("../scripts/utils.jl")
 include("../figure_scripts/utils.jl")
 
 # compromise functions
+# use PyPlot backend
+pyplot()
 
-save_figures = false
+save_figures = true
 
 resolution = resolutions[1]
 # define things for forward map
@@ -74,8 +76,8 @@ for j in 1:3
     loss = ℒ1(𝑪)
     Tᵖ = 𝒢1(𝑪)
     loss_string = @sprintf("%.1e", sqrt(loss))
-    p1 = plot(les1.T[:,end], les1.z, label = "LES 1", legend = :bottomright, ylabel = "depth [m]", xlabel = "Temperature [C]", ylims = (-100, 0), xlims = xlims)
-    p1 = scatter!(Tᵖ[:,end], zᵖ, label = labels[j], title = "Error 1 = " * loss_string * " [C]", grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
+    p1 = plot(les1.T[:,end], les1.z, label = "LES 1", legend = :bottomright, ylabel = "depth [m]", xlabel = "Temperature " * celsius, ylims = (-100, 0), xlims = xlims)
+    p1 = scatter!(Tᵖ[:,end], zᵖ, label = labels[j], title = "Error 1 = " * loss_string * " " * celsius, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
     display(p1)
     push!(p_case1,p1)
 end
@@ -97,8 +99,8 @@ for j in 1:3
     loss = ℒ2(𝑪)
     Tᵖ = 𝒢2(𝑪)
     loss_string = @sprintf("%.1e", sqrt(loss))
-    p1 = plot(les2.T[:,end], les2.z, label = "LES 2", legend = :bottomright, ylabel = "depth [m]", xlabel = "Temperature [C]", ylims = (-100,0), xlims = xlims)
-    p1 = scatter!(Tᵖ[:,end], zᵖ, label = labels[j], title = "Error 2 = " * loss_string * " [C]", grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
+    p1 = plot(les2.T[:,end], les2.z, label = "LES 2", legend = :bottomright, ylabel = "depth [m]", xlabel = "Temperature " * celsius, ylims = (-100,0), xlims = xlims)
+    p1 = scatter!(Tᵖ[:,end], zᵖ, label = labels[j], title = "Error 2 = " * loss_string * " " * celsius, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
     display(p1)
     push!(p_case2,p1)
 end

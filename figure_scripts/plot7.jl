@@ -2,6 +2,11 @@ include("../src/LocalOceanUQSupplementaryMaterials.jl")
 include("../scripts/utils.jl")
 include("../figure_scripts/utils.jl")
 
+# use PyPlot backend
+pyplot()
+
+
+
 save_figures = true
 rescale_4 = true
 Cᴿ = 0.3
@@ -46,7 +51,7 @@ for resolution in resolutions[1:3]
     C = optimal_values[:]
     σC = std_amplitude .* standard_deviations[:]
     res_string = @sprintf("%.2f ", 100/resolution[1])
-    p1 = scatter!(N², C, xlabel = "Background Stratification, N^2 s^(-2)", ylabel = names[p_index], legend = :topleft, ribbon = σC, fillalpha = 0.2, ylims = y_range, label = "Resolution = " * res_string * "meters")
+    p1 = scatter!(N², C, xlabel = "Background Stratification, N^2 " * itime, ylabel = names[p_index], legend = :topleft, ribbon = σC, fillalpha = 0.2, ylims = y_range, label = "Resolution = " * res_string * "meters")
     display(p1)
     if save_figures == true
         savefig(p1, pwd() * "/figures/figure_7.png")
@@ -97,7 +102,7 @@ for resolution in resolutions[1:3]
     C = optimal_values[:]
     σC = std_amplitude .* standard_deviations[:]
     res_string = @sprintf("%.2f ", 100/resolution[1])
-    p1 = scatter!(N², C, xlabel = "Background Stratification, N^2 s^(-2)", ylabel = names[p_index], legend = :topleft, yerror = σC, ylims = y_range, label = "Resolution = " * res_string * "meters")
+    p1 = scatter!(N², C, xlabel = "Background Stratification, N^2 " * itime, ylabel = names[p_index], legend = :topleft, yerror = σC, ylims = y_range, label = "Resolution = " * res_string * "meters")
     display(p1)
     if save_figures == true
         savefig(p1, pwd() * "/figures/figure_7_alternative.png")
@@ -148,7 +153,7 @@ for resolution in resolutions[1:1]
     C = optimal_values[:]
     σC = std_amplitude .* standard_deviations[:]
     res_string = @sprintf("%.2f ", 100/resolution[1])
-    p1 = scatter!(N², C, xlabel = "Background Stratification, N^2 s^(-2)", ylabel = names[p_index], legend = :topleft, yerror = range_values, ylims = y_range, label = "Resolution = " * res_string * "meters")
+    p1 = scatter!(N², C, xlabel = "Background Stratification, N^2 " * itime, ylabel = names[p_index], legend = :topleft, yerror = range_values, ylims = y_range, label = "Resolution = " * res_string * "meters")
     display(p1)
     if save_figures == true
         savefig(p1, pwd() * "/figures/figure_7_alternative2.png")
@@ -202,7 +207,7 @@ for resolution in resolutions[1:1]
     σC = std_amplitude .* standard_deviations[:]
     res_string = @sprintf("%.2f ", 100/resolution[1])
     per_string = @sprintf("%.0f", confidence_interval* 100)
-    p1 = scatter!(N², C2, xlabel = "Background Stratification, N² [1/s²]", ylabel = names[p_index], legend = :topleft, yerror = range_values, ylims = y_range, label = "Median values at " * res_string * "meter resolution")
+    p1 = scatter!(N², C2, xlabel = "Background Stratification, N² " * itime, ylabel = names[p_index], legend = :topleft, yerror = range_values, ylims = y_range, label = "Median values at " * res_string * "meter resolution")
     p1  = scatter!(N², C, label = "Optimal values at " * res_string * "meter resolution", shape = :star5, legend = :topleft, title = "Modes, Medians, and " * per_string * "% Probability Intervals", grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
     display(p1)
     if save_figures == true
@@ -264,7 +269,7 @@ for p_index in [1,2,3,4]
     σC = std_amplitude .* standard_deviations[:]
     res_string = @sprintf("%.2f ", 100/resolution[1])
     per_string = @sprintf("%.0f", confidence_interval* 100)
-    p1 = scatter!(N², C2, xlabel = "Background Stratification, N² [1/s²]", ylabel = names[p_index], legend = false, yerror = range_values, ylims = y_range, label = "Median values at " * res_string * "meter resolution")
+    p1 = scatter!(N², C2, xlabel = "Background Stratification, N² " * itime, ylabel = names[p_index], legend = false, yerror = range_values, ylims = y_range, label = "Median values at " * res_string * "meter resolution")
     p1  = scatter!(N², C, label = "Optimal values at " * res_string * "meter resolution", shape = :star5, legend = false, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
     display(p1)
     if save_figures == true

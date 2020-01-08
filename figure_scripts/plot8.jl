@@ -2,6 +2,9 @@ include("../src/LocalOceanUQSupplementaryMaterials.jl")
 include("../scripts/utils.jl")
 include("../figure_scripts/utils.jl")
 
+# use PyPlot backend
+pyplot()
+
 save_figures = true
 rescale_4 = true
 Cᴿ = 0.3
@@ -45,7 +48,7 @@ for resolution in resolutions[1:3]
     C = optimal_values[:]
     σC = std_amplitude .* standard_deviations[:]
     res_string = @sprintf("%.2f ", 100/resolution[1])
-    p1 = scatter!(Φ, C, xlabel = "Bouyancy Forcing, s^(-2)", ylabel = names[p_index], legend = :topright, ribbon = σC, fillalpha = 0.2, ylims = y_range, label = "Resolution = " * res_string * "meters")
+    p1 = scatter!(Φ, C, xlabel = "Bouyancy Forcing " * itime, ylabel = names[p_index], legend = :topright, ribbon = σC, fillalpha = 0.2, ylims = y_range, label = "Resolution = " * res_string * "meters")
     display(p1)
     if save_figures == true
         savefig(p1, pwd() * "/figures/figure_8.png")
@@ -158,7 +161,7 @@ for resolution in resolutions[1:1]
     C2 = optimal_values[:]
     σC = std_amplitude .* standard_deviations[:]
     res_string = @sprintf("%.2f ", 100.0/resolution[1])
-    p1 = scatter!(Φ, C, xlabel = "Surface Bouyancy Forcing, s^(-2)", ylabel = names[p_index], legend = :topright, yerror = range_values, fillalpha = 0.2, ylims = y_range, label = "Medians at Resolution = " * res_string * "meters", grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
+    p1 = scatter!(Φ, C, xlabel = "Surface Bouyancy Forcing " * itime, ylabel = names[p_index], legend = :topright, yerror = range_values, fillalpha = 0.2, ylims = y_range, label = "Medians at Resolution = " * res_string * "meters", grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
     p1  = scatter!(Φ, C2, label = "Modes at Resolution = " * res_string * "meters", shape = :star5)
     display(p1)
     if save_figures == true

@@ -1,9 +1,10 @@
 include("../src/LocalOceanUQSupplementaryMaterials.jl")
 include("../scripts/utils.jl")
 include("../figure_scripts/utils.jl")
-
+# use PyPlot backend
+pyplot()
 # pdf figures
-save_figures = false
+save_figures = true
 case = cases[1]
 #case = "compromise"
 resolution = resolutions[1]

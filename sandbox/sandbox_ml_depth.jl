@@ -52,7 +52,9 @@ for case in cases[1:1]
 end
 
 ###
-save_figures = false
+# use PyPlot backend
+pyplot()
+save_figures = true
 case = cases[1]
 filename = pwd() * "/LES/" * case * "_profiles.jld2"
 les = CoreFunctionality.OceananigansData(filename)
@@ -97,7 +99,7 @@ println("The smallest mixed layer depth is $min_seen")
 
 timelabel = @sprintf("%.1f", trange[end])
 tmp = ones(length(h1[end][1].weights))
-p1 = histogram(ϕrange, weights = h1[end][1].weights, bins = 200, norm = true, xlims = (65, 75), ylabel = "probability", xlabel = "mixed layer depth", title = "Mixed layer depth uncertainty at " * timelabel * " days", legend = false)
+p1 = histogram(ϕrange, weights = h1[end][1].weights, bins = 200, norm = true, xlims = (65, 75), ylabel = "probability", xlabel = "mixed layer depth", title = "Mixed layer depth uncertainty at " * timelabel * " days", legend = false, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
 if save_figures
     savefig(p1, pwd() * "/figures/ml_figure_alternative.png")
 end
