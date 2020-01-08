@@ -1,5 +1,6 @@
 include("../src/LocalOceanUQSupplementaryMaterials.jl")
 include("../scripts/utils.jl")
+include("../figure_scripts/utils.jl")
 using Plots, Printf, Statistics, JLD2
 # use PyPlot backend
 pyplot()
@@ -36,7 +37,7 @@ for j in zip(Nlist, Δt, labels)
     t = les.t ./ seconds_in_a_day
     inds = 30:length(les.t)
     loss = ℒᵗ(default_𝑪)
-    p1 = plot!(t[inds], sqrt.(loss[inds]), label = j[3], legend = :bottomright, xlabel = "days", ylabel = "Error " * celcius, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box )
+    p1 = plot!(t[inds], sqrt.(loss[inds]), label = j[3], legend = :bottomright, xlabel = "days", ylabel = "Error " * celsius, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box )
     if save_figures == true
         savefig(p1, pwd() * "/figures/figure_1.png")
     end

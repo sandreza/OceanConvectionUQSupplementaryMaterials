@@ -96,10 +96,10 @@ anim = @animate for i in 1:10:Nt
     p = []
     h1_string = @sprintf("%.1f", h1[i])
     h2_string = @sprintf("%.1f", h2[i])
-    p1 = plot(𝒢[:,i], zp, label = "KPP 1", legend = :topleft, ylabel = "depth [m]", xlabel = "Temperature [C]")
+    p1 = plot(𝒢[:,i], zp, label = "KPP 1", legend = :topleft, ylabel = "depth [m]", xlabel = "Temperature " * celsius)
     plot!(Tmax .+ (zp .* γ1), -h1[i] .+ (zp .* 0), label = "h = " * h1_string * " [m]" , legend = :bottomright, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box )
     push!(p,p1)
-    p1 = plot(𝒢2[:,i], zp, label = "KPP 2", legend = :topleft, ylabel = "depth [m]", xlabel = "Temperature [C]")
+    p1 = plot(𝒢2[:,i], zp, label = "KPP 2", legend = :topleft, ylabel = "depth [m]", xlabel = "Temperature " * celsius)
     plot!(Tmax .+ (zp .* γ1), -h2[i] .+ (zp .* 0), label = "h = " * h2_string * " [m]" , legend = :bottomright, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box )
     push!(p,p1)
 
@@ -114,9 +114,9 @@ p = []
 i = Nt
 h1_string = @sprintf("%.1f", h1[i])
 h2_string = @sprintf("%.1f", h2[i])
-p1 = scatter(𝒢[:,i], zp, label = "KPP 1", legend = :topleft, ylabel = "depth [m]", xlabel = "Temperature [C]")
+p1 = scatter(𝒢[:,i], zp, label = "KPP 1", legend = :topleft, ylabel = "depth [m]", xlabel = "Temperature " * celsius)
 plot!(Tmax .+ (zp .* γ1), -h1[i] .+ (zp .* 0), label = "h = " * h1_string * " [m]" , legend = :topleft, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, xlims = (5, 7.5 ))
-p2 = scatter(𝒢2[:,i], zp, label = "KPP 2", legend = :topleft, ylabel = "depth [m]", xlabel = "Temperature [C]")
+p2 = scatter(𝒢2[:,i], zp, label = "KPP 2", legend = :topleft, ylabel = "depth [m]", xlabel = "Temperature " * celsius)
 plot!(Tmax .+ (zp .* γ1), -h2[i] .+ (zp .* 0), label = "h = " * h2_string * " [m]" , legend = :topleft, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box , xlims = (5, 7.5) )
 p3 = plot(p1,p2)
 display(p3)

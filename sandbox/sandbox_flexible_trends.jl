@@ -1,7 +1,10 @@
+# use PyPlot backend
+pyplot()
 
-save_figures = false
+save_figures = true
 ###
 # for stratification
+bflux = L"[m/s^3]"
 plot()
 p_index = 5
 range_list = [(0,0.02), (3,5),(1,2), (0,1), (0,1)]
@@ -11,6 +14,12 @@ y_range = range_list[p_index]
 std_amplitude = 1
 confidence_interval = 0.95
 save_figures = true
+rescale_p = true
+Cᴿ = 0.3
+if rescale_p
+    range_list = [(0,0.02), (3,5),(1,2), (0,1), (0.0, 1 * Cᴿ) ]
+end
+y_range = range_list[p_index]
 # loop over cases
 for resolution in resolutions[1:1]
     chains = []
@@ -27,6 +36,9 @@ for resolution in resolutions[1:1]
         filename = pwd() * "/mcmc_data/" * case * resolution_label  * "_flexible_new" * "_mcmc.jld2"
         mcmc_data = jldopen(filename, "r")
         chain = mcmc_data["𝑪"]
+        if rescale_p
+            @. chain[p_index, : ] *= Cᴿ
+        end
         e1 = mcmc_data["ε"]
         e2 = mcmc_data["proposal_ε"]
         close(mcmc_data)
@@ -51,8 +63,8 @@ for resolution in resolutions[1:1]
     σC = std_amplitude .* standard_deviations[:]
     res_string = @sprintf("%.2f ", 100/resolution[1])
     per_string = @sprintf("%.0f", confidence_interval* 100)
-    p1 = scatter!(N², C2, xlabel = "Background Stratification, N² [1/s²]", ylabel = "Unresolved Shear", legend = :topleft, yerror = range_values, ylims = y_range, label = "Median values at " * res_string * "meter resolution")
-    p1  = scatter!(N², C, label = "Optimal values at " * res_string * "meter resolution", shape = :star5, legend = :topleft, title = "Modes, Medians, and " * per_string * "% Confidence Intervals" * " for h²N² scaling", grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
+    p1 = scatter!(N², C2, xlabel = "Background Stratification, N² " * itime, ylabel = "Entrainment Coefficient", legend = :topleft, yerror = range_values, ylims = y_range, label = "Median values at " * res_string * "meter resolution")
+    p1  = scatter!(N², C, label = "Optimal values at " * res_string * "meter resolution", shape = :star5, legend = :topleft, title = "Modes, Medians, and " * per_string * "% Probability Intervals" * " for h²N² scaling", grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
     display(p1)
     if save_figures
         savefig(p1, pwd() * "/figures/new_scaling_trends.png")
@@ -119,7 +131,7 @@ for resolution in resolutions[1:1]
     σC = std_amplitude .* standard_deviations[:]
     res_string = @sprintf("%.2f ", 100/resolution[1])
     per_string = @sprintf("%.0f", confidence_interval* 100)
-    p1 = scatter!(N², C2, xlabel = "Surface Buoyancy Flux, [m/s³]", ylabel = "Unresolved Shear", legend = :topleft, yerror = range_values, ylims = y_range, label = "Median values at " * res_string * "meter resolution")
+    p1 = scatter!(N², C2, xlabel = "Surface Buoyancy Flux " * bflux, ylabel = "Unresolved Shear", legend = :topleft, yerror = range_values, ylims = y_range, label = "Median values at " * res_string * "meter resolution")
     p1  = scatter!(N², C, label = "Optimal values at " * res_string * "meter resolution", shape = :star5, legend = :topleft, title = "Modes, Medians, and " * per_string * "% Confidence Intervals" * " for h²N² scaling", grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
     display(p1)
     if save_figures
