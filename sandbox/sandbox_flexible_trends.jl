@@ -1,3 +1,6 @@
+include("../src/LocalOceanUQSupplementaryMaterials.jl")
+include("../scripts/utils.jl")
+include("../figure_scripts/utils.jl")
 # use PyPlot backend
 pyplot()
 
@@ -8,7 +11,7 @@ bflux = L"[m/s^3]"
 plot()
 p_index = 5
 range_list = [(0,0.02), (3,5),(1,2), (0,1), (0,1)]
-case_range = 3:1:32   # 1:2 and 3:34. 32:34 isn't finished
+case_range = 3:1:34   # 1:2 and 3:34. 32:34 isn't finished
 
 y_range = range_list[p_index]
 std_amplitude = 1
@@ -22,6 +25,8 @@ end
 y_range = range_list[p_index]
 # loop over cases
 for resolution in resolutions[1:1]
+    N = resolution[1]
+    resolution_label = "_res_" * string(N)
     chains = []
     optimal_values = []
     median_values = []
@@ -32,6 +37,7 @@ for resolution in resolutions[1:1]
         filename = pwd() * "/LES/" * case * "_profiles.jld2"
         les = CoreFunctionality.OceananigansData(filename)
         stratification = les.α * les.g * les.bottom_T
+
         push!(stratifications, stratification)
         filename = pwd() * "/mcmc_data/" * case * resolution_label  * "_flexible_new" * "_mcmc.jld2"
         mcmc_data = jldopen(filename, "r")
@@ -62,10 +68,11 @@ for resolution in resolutions[1:1]
     C2 = median_values[:]
     σC = std_amplitude .* standard_deviations[:]
     res_string = @sprintf("%.2f ", 100/resolution[1])
-    per_string = @sprintf("%.0f", confidence_interval* 100)
+    per_string = @sprintf("%.0f", (2*confidence_interval-1)* 100)
     p1 = scatter!(N², C2, xlabel = "Background Stratification, N² " * itime, ylabel = "Entrainment Coefficient", legend = :topleft, yerror = range_values, ylims = y_range, label = "Median values at " * res_string * "meter resolution")
-    p1  = scatter!(N², C, label = "Optimal values at " * res_string * "meter resolution", shape = :star5, legend = :topleft, title = "Modes, Medians, and " * per_string * "% Probability Intervals" * " for h²N² scaling", grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
+    p1  = scatter!(N², C, label = "Optimal values at " * res_string * "meter resolution", shape = :star5, legend = :topleft, title = "Modes, Medians, and " * per_string * "% Probability Intervals", grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
     display(p1)
+    #  * " for h²N² scaling"
     if save_figures
         savefig(p1, pwd() * "/figures/new_scaling_trends.png")
     end
@@ -93,6 +100,8 @@ confidence_interval = 0.95
 
 # loop over cases
 for resolution in resolutions[1:1]
+    N = resolution[1]
+    resolution_label = "_res_" * string(N)
     chains = []
     optimal_values = []
     median_values = []
@@ -110,6 +119,9 @@ for resolution in resolutions[1:1]
         e1 = mcmc_data["ε"]
         e2 = mcmc_data["proposal_ε"]
         close(mcmc_data)
+        if rescale_p
+            @. chain[p_index, : ] *= Cᴿ
+        end
         push!(chains, chain)
         optimal_value = chain[p_index, argmin(e1)]
         println("case = $case")
@@ -130,10 +142,11 @@ for resolution in resolutions[1:1]
     C2 = median_values[:]
     σC = std_amplitude .* standard_deviations[:]
     res_string = @sprintf("%.2f ", 100/resolution[1])
-    per_string = @sprintf("%.0f", confidence_interval* 100)
-    p1 = scatter!(N², C2, xlabel = "Surface Buoyancy Flux " * bflux, ylabel = "Unresolved Shear", legend = :topleft, yerror = range_values, ylims = y_range, label = "Median values at " * res_string * "meter resolution")
-    p1  = scatter!(N², C, label = "Optimal values at " * res_string * "meter resolution", shape = :star5, legend = :topleft, title = "Modes, Medians, and " * per_string * "% Confidence Intervals" * " for h²N² scaling", grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
+    per_string = @sprintf("%.0f", (2*confidence_interval-1)* 100)
+    p1 = scatter!(N², C2, xlabel = "Surface Buoyancy Flux " * bflux, ylabel = "Entrainment Coefficient", legend = :topleft, yerror = range_values, ylims = y_range, label = "Median values at " * res_string * "meter resolution")
+    p1  = scatter!(N², C, label = "Optimal values at " * res_string * "meter resolution", shape = :star5, legend = :topleft, title = "Modes, Medians, and " * per_string * "% Confidence Intervals" , grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
     display(p1)
+    # * " for h²N² scaling"
     if save_figures
         savefig(p1, pwd() * "/figures/h2n2_surface.png")
     end

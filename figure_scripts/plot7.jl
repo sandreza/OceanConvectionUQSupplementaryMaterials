@@ -206,7 +206,7 @@ for resolution in resolutions[1:1]
     C2 = median_values[:]
     σC = std_amplitude .* standard_deviations[:]
     res_string = @sprintf("%.2f ", 100/resolution[1])
-    per_string = @sprintf("%.0f", confidence_interval* 100)
+    per_string = @sprintf("%.0f", (2*confidence_interval-1)* 100)
     p1 = scatter!(N², C2, xlabel = "Background Stratification, N² " * itime, ylabel = names[p_index], legend = :topleft, yerror = range_values, ylims = y_range, label = "Median values at " * res_string * "meter resolution")
     p1  = scatter!(N², C, label = "Optimal values at " * res_string * "meter resolution", shape = :star5, legend = :topleft, title = "Modes, Medians, and " * per_string * "% Probability Intervals", grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
     display(p1)
