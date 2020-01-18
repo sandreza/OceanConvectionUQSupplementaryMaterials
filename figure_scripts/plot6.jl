@@ -79,7 +79,7 @@ plot(p...)
 p1 = plot(p[4])
 
 if save_figures == true
-    savefig(p1, pwd() * "/figures/figure_6_distributions.png")
+    savefig(p1, pwd() * "/figures/figure_6_distributions.pdf")
 end
 ###
 ℒ_compromise(𝑪3)
@@ -106,7 +106,7 @@ for j in 1:4
 end
 p1 = plot(p_case1...)
 if save_figures == true
-    savefig(p1, pwd() * "/figures/figure_6_case_1.png")
+    savefig(p1, pwd() * "/figures/figure_6_case_1.pdf")
 end
 ###
 # show everything in case 2 scenario
@@ -129,22 +129,22 @@ for j in 1:4
 end
 p2 = plot(p_case2...)
 if save_figures == true
-    savefig(p2, pwd() * "/figures/figure_6_case_2.png")
+    savefig(p2, pwd() * "/figures/figure_6_case_2.pdf")
 end
 ###
 # show both cases at once with compromise optimal
 p1 = plot(p_case1[3], p_case2[3])
 if save_figures == true
-    savefig(p1, pwd() * "/figures/figure_6.png")
+    savefig(p1, pwd() * "/figures/figure_6.pdf")
 end
 
 p1 = plot(p_case1[1], p_case2[2], p_case1[3], p_case2[3])
 if save_figures == true
-    savefig(p1, pwd() * "/figures/figure_6_alternative.png")
+    savefig(p1, pwd() * "/figures/figure_6_alternative.pdf")
 end
 
 
 p1 = plot(p_case1[1], p_case2[2], p_case1[2], p_case2[1])
 if save_figures == true
-    savefig(p1, pwd() * "/figures/figure_6_alternative_2.png")
+    savefig(p1, pwd() * "/figures/figure_6_alternative_2.pdf")
 end

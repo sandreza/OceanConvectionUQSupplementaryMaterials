@@ -4,6 +4,7 @@ include("../figure_scripts/utils.jl")
 # use PyPlot backend
 pyplot()
 # pdf figures
+display_plot = false
 save_figures = true
 case = cases[1]
 #case = "compromise"
@@ -18,10 +19,10 @@ right_bounds[4] *= Cᴿ
 # marginal pdfs
 m,n = size(chain)
 p = marginal_pdfs(chain[:,1:(n-1)], left_bounds, right_bounds, parameter_dictionary, bins = 50)
-p1 = plot(p...)
+p1 = plot(p...);
 
 if save_figures == true
-    savefig(p1, pwd() * "/figures/figure_3.png")
+    savefig(p1, pwd() * "/figures/figure_3.pdf")
 end
 
 # joint pdfs, reminders of bounds
@@ -29,10 +30,9 @@ prob = 0.95
 left_bounds_j = a_quantile(chain, 1-prob)
 right_bounds_j = a_quantile(chain, prob)
 p = joint_pdfs(chain, left_bounds_j, right_bounds_j, parameter_dictionary, bins = 50)
-p1 = plot(p[[5,3,6,2]]...)
-
+p1 = plot(p[[5,3,6,2]]...);
 if save_figures == true
-    savefig(p1, pwd() * "/figures/figure_3b.png")
+    savefig(p1, pwd() * "/figures/figure_3b.pdf")
 end
 
 ###

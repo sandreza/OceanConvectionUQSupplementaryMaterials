@@ -59,7 +59,7 @@ plot(p...)
 p1 = plot(p[4])
 
 if save_figures == true
-    savefig(p1, pwd() * "/figures/figure_9_distributions.png")
+    savefig(p1, pwd() * "/figures/figure_9_distributions.pdf")
 end
 ###
 # parameters to loop over
@@ -83,7 +83,7 @@ for j in 1:3
 end
 p1 = plot(p_case1...)
 if save_figures == true
-    savefig(p1, pwd() * "/figures/figure_9_case_1.png")
+    savefig(p1, pwd() * "/figures/figure_9_case_1.pdf")
 end
 ###
 # show everything in case 2 scenario
@@ -106,24 +106,24 @@ for j in 1:3
 end
 p2 = plot(p_case2...)
 if save_figures == true
-    savefig(p2, pwd() * "/figures/figure_9_case_2.png")
+    savefig(p2, pwd() * "/figures/figure_9_case_2.pdf")
 end
 ###
 # Show median values for optimal in both cases
 p1 = plot(p_case1[1], p_case2[2])
 if save_figures == true
-    savefig(p1, pwd() * "/figures/figure_9_alternative.png")
+    savefig(p1, pwd() * "/figures/figure_9_alternative.pdf")
 end
 
 # Show median values in opposite cases
 p2 = plot(p_case1[2], p_case2[1])
 if save_figures == true
-    savefig(p2, pwd() * "/figures/figure_9.png")
+    savefig(p2, pwd() * "/figures/figure_9.pdf")
 end
 
 # Show them together
 p3 = plot(p_case1[1], p_case2[2], p_case1[2], p_case2[1])
 if save_figures == true
-    savefig(p3, pwd() * "/figures/figure_9_alternative3.png")
+    savefig(p3, pwd() * "/figures/figure_9_alternative3.pdf")
 end
 tmp = p3

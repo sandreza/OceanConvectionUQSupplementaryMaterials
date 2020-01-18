@@ -71,7 +71,7 @@ end
 
 p1 = plot(p[2:3]...)
 if save_figures == true
-    savefig(p1, pwd() * "/figures/figure_5.png")
+    savefig(p1, pwd() * "/figures/figure_5.pdf")
 end
 
 ###
@@ -90,7 +90,7 @@ end
 plot(loss_p[2])
 
 if save_figures == true
-    savefig(p2, pwd() * "/figures/figure_5_alternate.png")
+    savefig(p2, pwd() * "/figures/figure_5_alternate.pdf")
 end
 
 

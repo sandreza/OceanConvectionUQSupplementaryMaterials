@@ -6,6 +6,7 @@ using Plots, Printf, Statistics, JLD2, MCMCDiagnostics
 pyplot()
 #optimized vs nonoptimized kpp figures
 
+display_plot = false
 save_figures = true
 
 # choose case
@@ -69,17 +70,19 @@ for j in 1:4
     loss_string = @sprintf("%.1e", sqrt(loss))
     p1 = plot(les.T[:,end], les.z, label = "LES", legend = :topleft, ylabel = "depth [m]", xlabel = "Temperature " * celsius)
     p1 = scatter!(Tᵖ[:,end], zᵖ, label = labels[j], title = "Error = " * loss_string * " " * celsius, markersize = 3, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
-    display(p1)
+    if display_plot
+        display(p1)
+    end
     push!(p,p1)
 end
 
 p1 = plot(p[1:2]...)
 if save_figures == true
-    savefig(p1, pwd() * "/figures/figure_2.png")
+    savefig(p1, pwd() * "/figures/figure_2.pdf")
 end
 p1 = plot(p...)
 if save_figures == true
-    savefig(p1, pwd() * "/figures/figure_2b.png")
+    savefig(p1, pwd() * "/figures/figure_2b.pdf")
 end
 
 ###
@@ -98,7 +101,7 @@ end
 plot(loss_p[2])
 
 if save_figures == true
-    savefig(p2, pwd() * "/figures/figure_2_alternate.png")
+    savefig(p2, pwd() * "/figures/figure_2_alternate.pdf")
 end
 
 
@@ -116,7 +119,9 @@ anim = @animate for i in 1:20:length(les.t)
         p1 = scatter!(Tᵖ[:,i], zᵖ, label = labels[j], title = "Error = " * loss_string * " " * celsius, markersize = 3, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
         push!(p,p1)
     end
-    display(plot(p...))
+    if display_plot
+        display(plot(p...))
+    end
 end
 if save_figures == true
     gif(anim, pwd() * "/figures/figure_2_dynamic.gif", fps = 15)

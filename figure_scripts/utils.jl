@@ -1,7 +1,8 @@
 using LaTeXStrings
-
+using Plots.PlotMeasures
 const celsius = L"[$^\circ$C]";
 itime = L"[s^{-2}]"
+const acceleration = L"[m / s^{2}]"
 # utils for plots
 """
 get_chain(case, N)

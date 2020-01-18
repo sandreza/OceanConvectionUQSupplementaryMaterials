@@ -54,7 +54,7 @@ for resolution in resolutions[1:3]
     p1 = scatter!(N², C, xlabel = "Background Stratification, N^2 " * itime, ylabel = names[p_index], legend = :topleft, ribbon = σC, fillalpha = 0.2, ylims = y_range, label = "Resolution = " * res_string * "meters")
     display(p1)
     if save_figures == true
-        savefig(p1, pwd() * "/figures/figure_7.png")
+        savefig(p1, pwd() * "/figures/figure_7.pdf")
     end
 end
 
@@ -105,7 +105,7 @@ for resolution in resolutions[1:3]
     p1 = scatter!(N², C, xlabel = "Background Stratification, N^2 " * itime, ylabel = names[p_index], legend = :topleft, yerror = σC, ylims = y_range, label = "Resolution = " * res_string * "meters")
     display(p1)
     if save_figures == true
-        savefig(p1, pwd() * "/figures/figure_7_alternative.png")
+        savefig(p1, pwd() * "/figures/figure_7_alternative.pdf")
     end
 end
 
@@ -156,7 +156,7 @@ for resolution in resolutions[1:1]
     p1 = scatter!(N², C, xlabel = "Background Stratification, N^2 " * itime, ylabel = names[p_index], legend = :topleft, yerror = range_values, ylims = y_range, label = "Resolution = " * res_string * "meters")
     display(p1)
     if save_figures == true
-        savefig(p1, pwd() * "/figures/figure_7_alternative2.png")
+        savefig(p1, pwd() * "/figures/figure_7_alternative2.pdf")
     end
 end
 ###
@@ -211,7 +211,7 @@ for resolution in resolutions[1:1]
     p1  = scatter!(N², C, label = "Optimal values at " * res_string * "meter resolution", shape = :star5, legend = :topleft, title = "Modes, Medians, and " * per_string * "% Probability Intervals", grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
     display(p1)
     if save_figures == true
-        savefig(p1, pwd() * "/figures/figure_7_alternative3.png")
+        savefig(p1, pwd() * "/figures/figure_7_alternative3.pdf")
     end
 end
 
@@ -273,11 +273,11 @@ for p_index in [1,2,3,4]
     p1  = scatter!(N², C, label = "Optimal values at " * res_string * "meter resolution", shape = :star5, legend = false, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
     display(p1)
     if save_figures == true
-        savefig(p1, pwd() * "/figures/figure_7_alternative_" * names[p_index] * ".png")
+        savefig(p1, pwd() * "/figures/figure_7_alternative_" * names[p_index] * ".pdf")
     end
     push!(p,p1)
 end
 p1 = plot(p...)
 if save_figures == true
-    savefig(p1, pwd() * "/figures/figure_7_alternative5.png")
+    savefig(p1, pwd() * "/figures/figure_7_alternative5.pdf")
 end

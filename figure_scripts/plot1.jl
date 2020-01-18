@@ -5,6 +5,7 @@ using Plots, Printf, Statistics, JLD2
 # use PyPlot backend
 pyplot()
 
+display_plot = false
 save_figures = true
 
 case = cases[1]
@@ -39,8 +40,10 @@ for j in zip(Nlist, Δt, labels)
     loss = ℒᵗ(default_𝑪)
     p1 = plot!(t[inds], sqrt.(loss[inds]), label = j[3], legend = :bottomright, xlabel = "days", ylabel = "Error " * celsius, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box )
     if save_figures == true
-        savefig(p1, pwd() * "/figures/figure_1.png")
+        savefig(p1, pwd() * "/figures/figure_1.pdf")
     end
-    display(p1)
+    if display_plot
+        display(p1)
+    end
     push!(p,p1)
 end

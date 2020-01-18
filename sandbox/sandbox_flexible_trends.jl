@@ -85,6 +85,9 @@ save_figures = true
 plot()
 p_index = 5
 range_list = [(0,0.02), (3,5),(1,2), (0,1), (0,1)]
+if rescale_p
+    range_list = [(0,0.02), (3,5),(1,2), (0,1), (0.0, 1 * Cᴿ) ]
+end
 case_range = 1:10   # 1:2 and 3:34
 #=
 cr = []

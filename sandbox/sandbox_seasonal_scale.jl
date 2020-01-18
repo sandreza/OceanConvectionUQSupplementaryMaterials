@@ -1,6 +1,6 @@
 
 using OceanTurb
-
+save_figures = false
 const γ1 = 0.01/2 # related to stratification
 const β1  = 0.1 # half the jump in temperature
 const ϵ1 = 100.0  # half the length scale over which temperature changes rapidly
@@ -43,15 +43,16 @@ Nt = length(t)
 𝒢 = zeros(N, Nt)
 h1 = zeros(Nt)
 # loop the model
-ti = collect(time_index)
+ti = collect(1:length(t))
 for i in 1:Nt
     run_until!(model, Δt, t[i])
     @. 𝒢[:,i] = model.solution.T[1:N]
     h1[i] = model.state.h
 end
 
-p1 = plot(𝒢[:,1], zp)
+p1 = plot(𝒢[:,end], zp)
 println("mixed layer depth 1 is $(h1[end])")
+
 ##
 𝑪 = [0.132375367537476, 4.207959580871827, 1.4344368071261107, 3.543929859372545, 0.0 ,0.0]
 𝑪 = [0.1, 6.33, 1.36, 3.00, 0.0, 0.0]
@@ -76,7 +77,7 @@ Nt = length(t)
 𝒢2 = zeros(N, Nt)
 h2 = zeros(Nt)
 # loop the model
-ti = collect(time_index)
+ti = collect(1:length(t))
 for i in 1:Nt
     run_until!(model, Δt, t[i])
     @. 𝒢2[:,i] = model.solution.T[1:N]
@@ -110,8 +111,9 @@ if save_figures == true
 end
 
 ###
+Tmax = maximum(𝒢[:,1])
 p = []
-i = Nt
+i = Nt-10
 h1_string = @sprintf("%.1f", h1[i])
 h2_string = @sprintf("%.1f", h2[i])
 p1 = scatter(𝒢[:,i], zp, label = "KPP 1", legend = :topleft, ylabel = "depth [m]", xlabel = "Temperature " * celsius)
@@ -121,3 +123,60 @@ plot!(Tmax .+ (zp .* γ1), -h2[i] .+ (zp .* 0), label = "h = " * h2_string * " [
 p3 = plot(p1,p2)
 display(p3)
 savefig(p3, pwd() * "/figures/figure_10.png")
+
+
+###
+# alternative with mixed layer depth
+using LaTeXStrings
+pyplot()
+const celsius = L"[$^\circ$C]";
+
+day_string = @sprintf("%.1f", t[i]./ 86400)
+p1 = scatter(𝒢[:,i], zp, label = "KPP  at " * day_string * " days", legend = :topleft, ylabel = "depth [m]", xlabel = "Temperature " * celsius)
+plot!(Tmax .+ (zp .* γ1), -h1[i] .+ (zp .* 0), label = "h = " * h1_string * " [m]" , legend = :topleft, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, xlims = (5, 7.5 ), linecolor = :red)
+
+plot()
+p4 = plot(t ./ 86400, h1, xlabel = "days", ylabel = "mixed layer depth [m]", legend = :topleft, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box , label = "h", linecolor = :red)
+plot(p1,p4)
+
+
+###
+
+using LaTeXStrings
+pyplot()
+const celsius = L"[$^\circ$C]";
+
+day_string = @sprintf("%.1f", t[i]./ 86400)
+p1 = scatter(𝒢[:,i], zp, label = "KPP 1 at " * day_string * " days", legend = :topleft, ylabel = "depth [m]", xlabel = "Temperature " * celsius)
+plot!(Tmax .+ (zp .* γ1), -h1[i] .+ (zp .* 0), label = "h1 = " * h1_string * " [m]" , legend = :topleft, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, xlims = (5, 7.5 ), linecolor = :blue)
+p2 = scatter(𝒢2[:,i], zp, label = "KPP 2 at " * day_string * " days", legend = :topleft, ylabel = "depth [m]", xlabel = "Temperature " * celsius)
+plot!(Tmax .+ (zp .* γ1), -h2[i] .+ (zp .* 0), label = "h2 = " * h1_string * " [m]" , legend = :topleft, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, xlims = (5, 7.5 ), linecolor = :red)
+
+scatter(𝒢[:,i], zp, label = "KPP 1 at " * day_string * " days", legend = :topleft, ylabel = "depth [m]", xlabel = "Temperature " * celsius, color = :blue)
+plot!(Tmax .+ (zp .* γ1), -h1[i] .+ (zp .* 0), label = "h1 = " * h1_string * " [m]" , legend = :topleft, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, xlims = (5, 7.5 ), linecolor = :blue)
+scatter!(𝒢2[:,i], zp, label = "KPP 2 at " * day_string * " days", legend = :topleft, ylabel = "depth [m]", xlabel = "Temperature " * celsius, color = :red)
+p3 = plot!(Tmax .+ (zp .* γ1), -h2[i] .+ (zp .* 0), label = "h2 = " * h1_string * " [m]" , legend = :topleft, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, xlims = (5, 7.5 ), linecolor = :red)
+
+plot()
+plot(t ./ 86400, h1, xlabel = "days", ylabel = "mixed layer depth [m]", legend = :topleft, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box , label = "h2", linecolor = :blue)
+p4 = plot!(t ./ 86400, h2, xlabel = "days", ylabel = "mixed layer depth [m]", legend = :topleft, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box , label = "h1", linecolor = :red)
+plot(p1,p2, p4, layout = (3,1))
+plot(p3,p4)
+
+###
+p1 = plot()
+for i in ti[1:40:end]
+    day_string = @sprintf("%.1f", t[i]./ 86400)
+    p1 = plot!(𝒢[:,i], zp, label = "KPP at " * day_string * " days", legend = :bottomright, ylabel = "depth [m]", xlabel = "Temperature " * celsius, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
+    #plot!(Tmax .+ (zp .* γ1), -h1[i] .+ (zp .* 0), label = "h1 = " * h1_string * " [m]" , legend = false, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, xlims = (5, 7.5 ), linecolor = :blue)
+end
+display(p1)
+
+p4 = plot(t ./ 86400, h1, xlabel = "days", ylabel = "mixed layer depth [m]", legend = :topleft, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box , label = "h", linecolor = :blue)
+plot(p1,p4)
+
+
+###
+# gr()
+gr()
+plot(zp,zp, legend = false, xmirror = true)

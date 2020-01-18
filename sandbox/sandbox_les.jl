@@ -1,7 +1,7 @@
 using JLD2
-include("./src/LocalOceanUQSupplementaryMaterials.jl")
-include("./scripts/utils.jl")
-include("./figure_scripts/utils.jl")
+include("../src/LocalOceanUQSupplementaryMaterials.jl")
+include("../scripts/utils.jl")
+include("../figure_scripts/utils.jl")
 
 # les analysis
 # derivative function
@@ -23,6 +23,7 @@ case = "dns_old"
 case = "rdns"
 case = "rdns_2"
 case = "dns"
+case = cases[1]
 newcases = ["dns_old", "dns_2", "ndns", "rdns", "rdns_2"]
 filename = pwd() * "/LES/" * case * "_profiles.jld2"
 les = CoreFunctionality.OceananigansData(filename)
@@ -114,7 +115,7 @@ end
 field = les.ww
 max_field = maximum(field)
 min_field = minimum(field)
-animation = true
+animation = false
 end_ind = floor(Int, Nt/1)
 if animation
     for i in 1:10:end_ind
@@ -284,3 +285,24 @@ plot!(les.t, analytic, label = "analytic", legend = :topleft)
 scatter(les.wT[:,end], les.z, legend = false)
 
 minimum(les.wT[:,end]) ./ maximum(les.wT[:,end])
+
+
+###
+save_figures = true
+pyplot()
+ti = argmin(les.t .< 2*86400)
+les.t[ti]./86400
+tfield = les.T[:,ti]
+bfield = @. tfield * les.α * les.g
+ttop = 19.75
+tbottom = 19.5
+plot(tfield, les.z, ylims = (-50,0), xlims = (tbottom, ttop), linewidth = 2 , grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box,  ylabel = "Depth [m]", xlabel = "Temperature " * celsius, legend = false, title = " ", top_margin = 7.0mm )
+
+btop = les.α * les.g * ttop
+bbottom = les.α * les.g * tbottom
+p1 = plot!(twinx(), bfield, les.z, ylims = (-50, 0), xlims = (bbottom, btop), xlabel = "Buoyancy " * acceleration, legend = false, xmirror = true, yaxis = false, linewidth = 2 , grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
+
+if save_figures
+    savefig(p1, pwd() * "/figures/buoyancy_and_temperature.pdf")
+end
+display(p1)

@@ -51,7 +51,7 @@ for resolution in resolutions[1:3]
     p1 = scatter!(Φ, C, xlabel = "Bouyancy Forcing " * itime, ylabel = names[p_index], legend = :topright, ribbon = σC, fillalpha = 0.2, ylims = y_range, label = "Resolution = " * res_string * "meters")
     display(p1)
     if save_figures == true
-        savefig(p1, pwd() * "/figures/figure_8.png")
+        savefig(p1, pwd() * "/figures/figure_8.pdf")
     end
 end
 ###
@@ -112,7 +112,7 @@ for resolution in resolutions[1:1]
     p1 = scatter!(Φ, C, xlabel = "Surface Bouyancy Forcing, [1/s²]", ylabel = names[p_index], label = "Modes at " * res_string * "meter resolution", shape = :star5, legend = :topright, title = "Modes, Medians, and " * per_string * "% Confidence Intervals", grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
     display(p1)
     if save_figures == true
-        savefig(p1, pwd() * "/figures/figure_8_alternative.png")
+        savefig(p1, pwd() * "/figures/figure_8_alternative.pdf")
     end
 end
 
@@ -165,6 +165,6 @@ for resolution in resolutions[1:1]
     p1  = scatter!(Φ, C2, label = "Modes at Resolution = " * res_string * "meters", shape = :star5)
     display(p1)
     if save_figures == true
-        savefig(p1, pwd() * "/figures/figure_8_alternative2.png")
+        savefig(p1, pwd() * "/figures/figure_8_alternative2.pdf")
     end
 end

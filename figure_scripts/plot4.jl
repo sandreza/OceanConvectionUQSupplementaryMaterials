@@ -3,6 +3,7 @@ include("../scripts/utils.jl")
 include("../figure_scripts/utils.jl")
 # uncertainty propagation figures
 
+display_plot = false
 save_figures = true
 
 case = cases[1]
@@ -30,17 +31,20 @@ close(domain_data)
 max_ind = length(h1)
 
 mat = uq_prop_mat(h1, index = max_ind-20)
-cmap = heatmap(ϕrange, zᵖ, log.(mat')/log(10),  color =:fire, background_color= :white, xlabel = "Temperature " * celsius, ylabel = "Depth [meters]", clims = (-5,-1.0), title="Posterior Ensemble", ylims = (-80,0), xlims = (19.2,19.5), grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
-display(cmap)
-
+cmap = heatmap(ϕrange, zᵖ, log.(mat')/log(10),  color =:fire, background_color= :white, xlabel = "Temperature " * celsius, ylabel = "Depth [meters]", clims = (-5,-1.0), title="Posterior Ensemble", ylims = (-80,0), xlims = (19.2,19.5), grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box);
+if display_plot
+    display(cmap)
+end
 
 matp = uq_prop_mat(h1p, index = max_ind-20)
-cmap_prior = heatmap(ϕrange, zᵖ, log.(matp')/log(10),  color =:fire, background_color= :white, xlabel = "Temperature " * celsius, ylabel = "Depth [meters]", clims = (-5,-1.0), title= "Prior Ensemble", ylims = (-80,0), xlims = (19.2,19.5), grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
-display(cmap_prior)
+cmap_prior = heatmap(ϕrange, zᵖ, log.(matp')/log(10),  color =:fire, background_color= :white, xlabel = "Temperature " * celsius, ylabel = "Depth [meters]", clims = (-5,-1.0), title= "Prior Ensemble", ylims = (-80,0), xlims = (19.2,19.5), grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box);
+if display_plot
+    display(cmap_prior)
+end
 
-p1 = plot(cmap_prior, cmap)
+p1 = plot(cmap_prior, cmap);
 if save_figures == true
-    savefig(p1, pwd() * "/figures/figure_4.png")
+    savefig(p1, pwd() * "/figures/figure_4.pdf")
 end
 
 ###
@@ -52,7 +56,9 @@ anim = @animate for i in 1:1:max_ind
     cmap_posterior = heatmap(ϕrange, zᵖ, log.(mat')/log(10),  color =:fire, background_color= :white, xlabel = "Temperature " * celsius, ylabel = "Depth [meters]", clims = (-5,-0.5), title= "Posterior Ensemble", ylims = (-80,0))
 
     cmap_prior = heatmap(ϕrange, zᵖ, log.(matp')/log(10),  color =:fire, background_color= :white, xlabel = "Temperature " * celsius, ylabel = "Depth [meters]", clims = (-5,-0.5), title= "Prior Ensemble", ylims = (-80,0))
-    display(plot(cmap_prior,cmap_posterior))
+    if display_plot
+        display(plot(cmap_prior,cmap_posterior))
+    end
 end
 
 if save_figures == true
