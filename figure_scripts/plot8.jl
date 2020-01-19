@@ -12,7 +12,7 @@ Cᴿ = 0.3
 case_range = 1:10
 y_range = (1,16)
 if rescale_4
-    y_range = (0, 16* Cᴿ)
+    y_range = (0, 16 * Cᴿ)
 end
 std_amplitude = 1
 chains = []

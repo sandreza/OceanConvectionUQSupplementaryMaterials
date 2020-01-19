@@ -6,7 +6,7 @@ using Plots, Printf, Statistics, JLD2
 # use PyPlot backend
 pyplot()
 # local vs nonlocal kpp figures
-
+display_plot = false
 save_figures = true
 
 # choose case
@@ -29,7 +29,7 @@ zᵖ = zeros(N)
 ℒᵗ = CoreFunctionality.closure_T_nll(𝒢, les; weight = 1, subsample = subsample, series=true, power = 2, f1 = mean, f2 = maximum )
 
 # get MCMC data
-
+resolution_label = "_res_" * string(N)
 filename = pwd() * "/mcmc_data/" * case * resolution_label * "_mcmc.jld2"
 mcmc_data = jldopen(filename, "r")
 chain = mcmc_data["𝑪"]
@@ -39,7 +39,6 @@ acceptance_rate = sum(e1 .== e2) / length(e1)
 indmin = argmin(e1)
 close(mcmc_data)
 # get MCMC nonolocal data
-resolution_label = "_res_" * string(N)
 filename = pwd() * "/mcmc_data/" * case * resolution_label * "_no_nonlocal_mcmc.jld2"
 mcmc_data = jldopen(filename, "r")
 nn_chain = mcmc_data["𝑪"]
@@ -63,9 +62,11 @@ for j in 1:3
     loss = ℒ(𝑪)
     Tᵖ = 𝒢(𝑪)
     loss_string = @sprintf("%.1e", sqrt(loss))
-    p1 = plot(les.T[:,end], les.z, label = "LES", legend = :topleft, ylabel = "depth [m]", xlabel = "Temperature [C]", grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
+    p1 = plot(les.T[:,end], les.z, label = "LES", legend = :topleft, ylabel = "depth [m]", xlabel = "Temperature " * celsius, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
     p1 = scatter!(Tᵖ[:,end], zᵖ, label = labels[j], title = "Error = " * loss_string * " [C]", grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
-    display(p1)
+    if display_plot
+        display(p1)
+    end
     push!(p,p1)
 end
 
@@ -108,7 +109,9 @@ anim = @animate for i in 1:20:length(les.t)
         p1 = scatter!(Tᵖ[:,i], zᵖ, label = labels[j], title = "Error = " * loss_string * " [C]", grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
         push!(p,p1)
     end
-    display(plot(p...))
+    if display_plot
+        display(plot(p...))
+    end
 end
 
 if save_figures == true

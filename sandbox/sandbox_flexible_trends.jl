@@ -74,7 +74,7 @@ for resolution in resolutions[1:1]
     display(p1)
     #  * " for h²N² scaling"
     if save_figures
-        savefig(p1, pwd() * "/figures/new_scaling_trends.png")
+        savefig(p1, pwd() * "/figures/new_scaling_trends.pdf")
     end
 end
 
@@ -151,6 +151,6 @@ for resolution in resolutions[1:1]
     display(p1)
     # * " for h²N² scaling"
     if save_figures
-        savefig(p1, pwd() * "/figures/h2n2_surface.png")
+        savefig(p1, pwd() * "/figures/h2n2_surface.pdf")
     end
 end

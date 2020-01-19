@@ -220,7 +220,7 @@ end
 
 # include all together
 
-
+resolution = resolutions[1]
 p_index = 4
 range_list = [(0,1), (0,8),(0,6), (0,16)]
 if rescale_4

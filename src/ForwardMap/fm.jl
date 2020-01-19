@@ -92,7 +92,7 @@ closure_free_convection_flexible(N, Δt, les::OceananigansData; subsample = 1, g
     𝑪[4]: Shear Constant, w1 * w2 \n
     𝑪[5] = Shear Constant 2
     𝑪[6]: Shear Constant 3,\n
-- The extra parameters correspond to  C[5] * w1^(1+power) * w2^(1-power)
+- The extra parameters correspond to  C[5] * w1^(1-power) * w2^(1+power)
 - where w1 = max(0, h * Qb)^(1/3), w2 = sqrt(𝑪[6] * h^2), are two velocity scales.
 
 """

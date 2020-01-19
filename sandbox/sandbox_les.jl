@@ -306,3 +306,79 @@ if save_figures
     savefig(p1, pwd() * "/figures/buoyancy_and_temperature.pdf")
 end
 display(p1)
+
+###
+#mixed layer depths
+#gr()
+const celsius = L"[$^\circ$C]";
+field = les.T
+max_field = maximum(field)
+max_field = 19.5
+min_field = minimum(field)
+animation = false
+end_ind = floor(Int, Nt/1)
+i = end_ind
+ϕ = field[:,i]
+time_string = @sprintf("%.1i", les.t[i] ./ 86400)
+p1 = plot(ϕ, les.z, legend = :topleft, xlims = (min_field, max_field), title = "Day = " * time_string, label = "Temperature", color = :blue, linewidth = 2)
+# middle
+plot!(max_field .+ (les.z .* (max_field - min_field)/les.L), -h[i] .+ (les.z .* 0), label = "h", linewidth = 2 , color = :red)
+# top
+plot!(max_field .+ (les.z .* (max_field - min_field)/les.L), -h1[i] .+ (les.z .* 0), label = "h¹", linewidth = 2, color = :orange )
+# bottom
+plot!(max_field .+ (les.z .* (max_field - min_field)/les.L), -h2[i] .+ (les.z .* 0), label = "h²", linewidth = 2, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box , ylabel = "Depth [meters]", xlabel = "Temperature " * celsius,  color = :purple)
+display(p1)
+
+if save_figures
+    savefig(p1, pwd() * "/figures/mixed_layer_depths.pdf")
+end
+###
+save_figures = false
+gr()
+analytic = @. sqrt(2.8 * Qᵇ / N² * les.t)
+yvec = @. sqrt(Qᵇ / N² * les.t)
+days = @. les.t / 86400
+plot(days, h, label = "h", linewidth = 2 , color = :red, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box , ylabel = "Depth [meters]", xlabel = "days", xlims = (0.1, 8.0) , legend = :topleft)
+plot!(days, h1, label = "h¹", linewidth = 2 , color = :orange)
+plot!(days, h2, label = "h²", linewidth = 2 , color = :purple)
+
+p2 = plot!(days, analytic, color = :blue, label = "analytic", linewidth = 2 )
+display(p2)
+
+if save_figures
+    savefig(p2, pwd() * "/figures/mixed_layer_depths_in_time.pdf")
+end
+
+function least_squares_fit(vec1, vec2)
+    return vec1' * vec2 / (vec2'*vec2)
+end
+les_sqares_fit_1 = least_squares_fit(h1[16:end], yvec[16:end])^2
+les_sqares_fit_2 = least_squares_fit(h2[16:end], yvec[16:end])^2
+les_sqares_fit = least_squares_fit(h[16:end], yvec[16:end])^2
+
+###
+save_figures = true
+pyplot()
+analytic = @. sqrt(3.0 * Qᵇ / N² * les.t)
+analytic_classic = @. sqrt(2.0 * Qᵇ / N² * les.t)
+days = @. les.t / 86400
+plot(days, h2, label = "h", linewidth = 3 , color = :red, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box , ylabel = "Depth [meters]", xlabel = "days", xlims = (0.1, 8.0) , legend = :topleft)
+
+p3 = plot!(days, analytic, color = :blue, linestyle = :dot, label = "analytic", linewidth = 10 )
+p3 = plot!(days, analytic_classic, color = :purple, linestyle = :dashed, label = "classic", linewidth = 3 )
+display(p3)
+
+if save_figures
+    savefig(p3, pwd() * "/figures/mixed_layer_depths_in_time_simpler.pdf")
+end
+
+
+###
+gr()
+label = L"\Delta b \Delta h / (w^*)^2"
+plot(les.t ./ 86400, ww_top )
+plot(les.t ./ 86400, ww_top ./ ww_star )
+plot(ww_star, Δh )
+
+plot(les.t ./ 86400, ΔB .* Δh ./ ww_star, ylims = (0,10), title = "delta b  * delta h / (w_star)²", xlabel = "days", ylabel = "dimensionless ratio" , legend = false)
+plot(les.t ./ 86400, ΔB .* Δh ./ ww_top, ylims = (0,4000), title = "delta b  * delta h / (ww_top_of_entrainment)", xlabel = "days", ylabel = "dimensionless ratio"  , legend = false)
