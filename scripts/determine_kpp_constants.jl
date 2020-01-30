@@ -9,6 +9,7 @@ cˢ = 98.96  # similarity constant, page 392
 ϵ = 0.1     # surface layer fraction, page 371
 
 Cᴷᴱ = Cᵛ * (-βᵀ / (cˢ * ϵ))^(1/2) / (Riᶜ * κ) * (cˢ * ϵ * κ)^(1/3) #formula on page 372
+# Cᴷᴱ = Cᵛ * (-βᵀ)^(1/2) / (Riᶜ * κ^(2/3)) * (cˢ * ϵ )^(-1/6)
 # note that the critical richardson number drops out of the resulting expression in the strongly convective limit
 
 # nonlocal diffusivity amplitude
@@ -17,9 +18,12 @@ Cˢ = Cstar * κ * (cˢ * κ * ϵ)^(1/3) # page 371
 
 
 # diffusivity amplitude
+Cᴰ = κ * (cˢ * κ * ϵ )^(1/3)  #page 371
+
 # in the paper we are using as the default
 default_𝑪 = randn(4)
 
 default_𝑪[1] = ϵ # the surface layer fraction
 default_𝑪[2] = Cˢ
-default_𝑪[4] = Cᴷᴱ * Riᶜ  # a product of a bunch of constants
+default_𝑪[3] = 1.36 # taken from ocean turb
+default_𝑪[4] = Cᴷᴱ * Riᶜ  # a product of a bunch of constants. But only the Cke parameter enters in oceanturb
