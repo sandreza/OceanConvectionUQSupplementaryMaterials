@@ -4,7 +4,7 @@ include("../figure_scripts/utils.jl")
 # use PyPlot backend
 pyplot()
 # pdf figures
-display_plot = false
+display_plot = true
 save_figures = true
 case = cases[1]
 #case = "compromise"

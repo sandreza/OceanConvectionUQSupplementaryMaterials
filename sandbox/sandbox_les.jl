@@ -260,7 +260,7 @@ max_field = maximum(field)
 min_field = minimum(field)
 animation = true
 end_ind = floor(Int, Nt/2)
-i = end_ind- 20
+i = end_ind - 20
 ϕ = field[:,i]
 time_string = @sprintf("%.1i", les.t[i] ./ 86400)
 p1 = plot(ϕ, les.z,  label = "Temperature", linewidth = 2, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box , ylabel = "Depth [meters]", xlabel = "Temperature [Celcius]", xlims = (19.4, 19.6), ylims = (-60, 0), legend = false)

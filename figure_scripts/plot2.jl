@@ -6,8 +6,8 @@ using Plots, Printf, Statistics, JLD2, MCMCDiagnostics
 pyplot()
 #optimized vs nonoptimized kpp figures
 
-display_plot = false
-save_figures = true
+display_plot = true
+save_figures = false
 
 # choose case
 case = cases[1]
@@ -60,7 +60,7 @@ mean_𝑪 = mean(chain,dims=2)
 median_𝑪 = median(chain,dims=2)
 #median_𝑪 = [0.0760809666611145; 4.342473912404762; 2.1630355831002954; 5.57111619953263] # across all
 
-parameter_list =[default_𝑪, optimal_𝑪, mean_𝑪, median_𝑪]
+parameter_list = [default_𝑪, optimal_𝑪, mean_𝑪, median_𝑪]
 plot()
 p = []
 for j in 1:4
@@ -69,7 +69,7 @@ for j in 1:4
     Tᵖ = 𝒢(𝑪)
     loss_string = @sprintf("%.1e", sqrt(loss))
     p1 = plot(les.T[:,end], les.z, label = "LES", legend = :topleft, ylabel = "depth [m]", xlabel = "Temperature " * celsius)
-    p1 = scatter!(Tᵖ[:,end], zᵖ, label = labels[j], title = "Error = " * loss_string * " " * celsius, markersize = 3, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
+    p1 = scatter!(Tᵖ[:,end], zᵖ, label = labels[j], title = "Error = " * loss_string * " " * celsius, markersize = 3, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, markerstrokealpha = 0.0,  markerstrokewidth = 3)
     if display_plot
         display(p1)
     end

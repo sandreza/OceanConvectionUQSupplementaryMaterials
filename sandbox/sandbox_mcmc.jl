@@ -3,13 +3,14 @@ include("../src/LocalOceanUQSupplementaryMaterials.jl")
 include("../scripts/utils.jl")
 include("../figure_scripts/utils.jl")
 
-generate_example = false
-generate_plot = false
+generate_example = true
+generate_plot = true
 
 generate_simple_example = true
 generate_simple_plot = true
+use_covariance_estimate = true
 
-case = cases[1]
+case = cases[6]
 if generate_example
     resolution = resolutions[1]
     use_covariance_estimate = true
@@ -28,7 +29,8 @@ if generate_example
     resolution_label = "_res_" * string(resolution[1])
     filename = pwd() * "/mcmc_data/" * case * resolution_label * "_optima.jld2"
     mcmc_data = jldopen(filename, "r")
-    initial_𝑪 = [0.2306826206143779, 3.8047948889896963, 2.0, 12.0]
+    initial_𝑪 = mcmc_data["parameter"] .+ [0.0 , 0.0, 1.0, 4.0]
+    # [0.2306826206143779, 3.8047948889896963, 3.0, 12.0]
     ℒ⁰ = mcmc_data["loss"]
     if use_covariance_estimate
         Σ = mcmc_data["covariance"]
@@ -38,13 +40,14 @@ if generate_example
     nll(𝑪) = ℒ(𝑪) / ℒ⁰
     filename = pwd() * "/mcmc_data/" * case * resolution_label * "_example_mcmc.jld2"
     # parameters for mcmc
-    nt = 10000
+    nt = 1000
     frequency = 100
     # define proposal matrix, 5% of default value
     proposal = CoreFunctionality.closure_proposal(σ, left_bounds = left_bounds, right_bounds = right_bounds)
     if use_covariance_estimate
-        Σ *= 0.1
+        Σ *= 0.01
         proposal = CoreFunctionality.closure_proposal(Σ, left_bounds = left_bounds, right_bounds = right_bounds)
+        println("using covariance estimate")
     end
     # now markov chain
     CoreFunctionality.markov_chain(nll, initial_𝑪, proposal, nt,  freq = frequency, filename = filename, verbose = true)
@@ -52,6 +55,8 @@ if generate_example
 end
 
 ###
+resolution = resolutions[1]
+resolution_label = "_res_" * string(resolution[1])
 if generate_plot
     filename = pwd() * "/mcmc_data/" * case * resolution_label * "_example_mcmc.jld2"
     mcmc_data = jldopen(filename, "r")
@@ -70,7 +75,10 @@ if generate_plot
     index2 = pair[2]
     bins = 30
     p1 = histogram2d(chain[index1, :], chain[index2, :], xlabel = parameter_dictionary[index1], ylabel = parameter_dictionary[index2], xlims = (left_bounds[index1], right_bounds[index1]), ylims = (left_bounds[index2], right_bounds[index2]), bins = bins, normalize = true, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
-    scatter!(chain[index1, 1:1], chain[index2, 1:1], shape = :star, color = :red)
+    scatter!(chain[index1, 1:1], chain[index2, 1:1], shape = :circle, color = :red, markersize = 6, label = "start")
+    # scatter!(chain[index1, end:end], chain[index2, end:end], shape = :star, color = :yellow, markersize = 8, label = "optimal")
+    display(p1)
+    savefig(p1, pwd() * "/figures/kpp_mcmc.pdf")
 end
 
 
