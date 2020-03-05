@@ -2,6 +2,7 @@ include("../src/LocalOceanUQSupplementaryMaterials.jl")
 include("../scripts/utils.jl")
 include("../figure_scripts/utils.jl")
 
+# multiple stratifications
 # use PyPlot backend
 pyplot()
 

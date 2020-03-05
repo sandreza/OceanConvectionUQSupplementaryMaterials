@@ -1,4 +1,4 @@
-using Plots, Printf, Statistics, Optim, JLD2, Random
+using Plots, Printf, Statistics, Optim, JLD2, Random, LaTeXStrings
 
 # Define cases to loop over
 cases = ["high_res_general_strat_16", "high_res_general_strat_64"]
@@ -41,7 +41,8 @@ function a_quantile(array, prob)
 end
 
 # Define parameter dictonary
-names = ["Surface Layer Fraction", "Nonlocal Amplitude", "Diffusivity Amplitude", "Mixing Parameter"]
+#names = ["Surface Layer Fraction", "Nonlocal Amplitude", "Diffusivity Amplitude", "Mixing Parameter"]
+names = [L"C^S", L"C^N", L"C^D", L"C^H"]
 values = [1,2,3,4]
 parameter_dictionary = Dict(zip(values, names))
 

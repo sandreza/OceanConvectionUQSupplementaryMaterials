@@ -6,7 +6,7 @@ using Plots, Printf, Statistics, JLD2, MCMCDiagnostics
 pyplot()
 #optimized vs nonoptimized kpp figures
 
-display_plot = true
+display_plot = false
 save_figures = false
 
 # choose case
@@ -43,7 +43,7 @@ close(mcmc_data)
 ess = randn(4)
 for i in 1:4
     # one million is a bit much
-    x1 = chain[i,1:end]
+    x1 = chain[i,1:10^5]
     variance_x1 = var(x1)
     ess[i] = effective_sample_size(x1, variance_x1)
 end

@@ -29,14 +29,14 @@ end
 prob = 0.95
 left_bounds_j = a_quantile(chain, 1-prob)
 right_bounds_j = a_quantile(chain, prob)
-p = joint_pdfs(chain, left_bounds_j, right_bounds_j, parameter_dictionary, bins = 50)
-p1 = plot(p[[5,3,6,2]]...);
+p = joint_pdfs(chain, left_bounds_j, right_bounds_j, parameter_dictionary, bins = 150)
+p1 = plot(p[[5,3,6,2]]...)
 if save_figures == true
     savefig(p1, pwd() * "/figures/figure_3b.pdf")
 end
 
 ###
-plot(chain[4,:])
+plot(chain[1,:])
 # extra
 acceptance_rate = sum(e1 .== e2) / length(e1)
 indmin = argmin(e1)
