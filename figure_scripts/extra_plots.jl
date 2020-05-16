@@ -1,3 +1,6 @@
+include("../src/LocalOceanUQSupplementaryMaterials.jl")
+include("../scripts/utils.jl")
+include("../figure_scripts/utils.jl")
 pyplot()
 parameter_list = [default_𝑪, optimal_𝑪, mean_𝑪, median_𝑪]
 plot()
@@ -11,6 +14,23 @@ ydown = -75
 
 p = []
 
+# get the les data
+case = cases[1]
+filename = pwd() * "/LES/" * case * "_profiles.jld2"
+les = CoreFunctionality.OceananigansData(filename)
+subsample_parameter = 1
+start = 1
+subsample = start:subsample_parameter:length(les.t)
+##
+N = Nlist[1]
+Δt = les.t[2] - les.t[1]
+zᵖ = zeros(N)
+# define the forward map
+𝒢 = CoreFunctionality.closure_free_convection(N, Δt, les, subsample = subsample, grid = zᵖ)
+# define the loss function
+ℒᵗ = CoreFunctionality.closure_T_nll(𝒢, les; weight = 1, subsample = subsample, series=true, power = 2, f1 = mean, f2 = maximum )
+
+
 p1 = plot(les.T[:,end], les.z, label = "LES", legend = :topleft, ylabel = "depth [m]", xlabel = "Temperature " * celsius, xlims = (xdown, xup), ylims = (ydown, yup), color = :blue, aspect_ratio = 2 * Δx/Δy, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
 
 j = 1
@@ -18,13 +38,13 @@ j = 1
 loss_default = ℒᵗ(𝑪)
 Tᵖ = 𝒢(𝑪)
 daystring = @sprintf("%.1f", les.t[end] ./ 86400)
-p1 = scatter!(Tᵖ[:,end], zᵖ, label = labels[j], title = "t = "* daystring * " days", markersize = 6, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, markerstrokealpha = 0.0,  markerstrokewidth = 0.0, markershape = :square, aspect_ratio = 2 * Δx/Δy, markercolor = :green)
+p1 = scatter!(Tᵖ[:,end], zᵖ, label = "Default", title = "t = "* daystring * " days", markersize = 6, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, markerstrokealpha = 0.0,  markerstrokewidth = 0.0, markershape = :square, aspect_ratio = 2 * Δx/Δy, markercolor = :green)
 
 j = 2
 𝑪 = parameter_list[j]
 loss_optimal = ℒᵗ(𝑪)
 Tᵖ = 𝒢(𝑪)
-p1 = scatter!(Tᵖ[:,end], zᵖ, label = labels[j], title = "t = "* daystring * " days", markersize = 6, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, markerstrokealpha = 0.0,  markerstrokewidth = 0.0, markershape = :circle, aspect_ratio = 2 * Δx/Δy, markercolor = :magenta)
+p1 = scatter!(Tᵖ[:,end], zᵖ, label = "Mode", title = "t = "* daystring * " days", markersize = 6, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, markerstrokealpha = 0.0,  markerstrokewidth = 0.0, markershape = :circle, aspect_ratio = 2 * Δx/Δy, markercolor = :magenta)
 
 inds = 30:length(les.t)
 p2 = plot(les.t[inds] ./ 86400, sqrt.(loss_default[inds]), legend = :bottomright, xlabel = "days", ylabel = "Error " * celsius, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, label = "Default" , color = :green)
@@ -32,7 +52,7 @@ p2 =  plot!(les.t[inds] ./ 86400, sqrt.(loss_optimal[inds]), legend = :topleft, 
 
 
 p = plot(p1, p2)
-# savefig(p, pwd() * "/figures/profile_and_loss.pdf")
+savefig(p, pwd() * "/figures/profile_and_loss.pdf")
 
 ###
 
@@ -95,7 +115,7 @@ p1 = plot!(twinx(), bfield, les.z, ylims = (ydown, yup), xlims = (bbottom, btop)
 plot(p1)
 savefig(p1, pwd() * "/figures/t_prof.pdf")
 
-# savefig(p1, pwd() * "/figures/buoyancy_and_temperature.pdf")
+savefig(p1, pwd() * "/figures/buoyancy_and_temperature.pdf")
 #=
 tindex = argmin(abs.(les.t .- 86400 *2))
 plot(les.T[:,tindex], les.z, label = "LES", legend = :topleft, ylabel = "depth [m]", xlabel = "Temperature " * celsius, xlims = (xdown, xup), ylims = (ydown, yup), color = :blue, aspect_ratio = 2 * Δx/Δy, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)

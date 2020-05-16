@@ -7,7 +7,7 @@ pyplot()
 #optimized vs nonoptimized kpp figures
 
 display_plot = false
-save_figures = false
+save_figures = true
 
 # choose case
 case = cases[1]
