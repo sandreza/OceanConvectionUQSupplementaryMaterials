@@ -201,12 +201,12 @@ joint_pdfs(chain, left_bounds, right_bounds, parameter_dictionary; indpairs)
 # Return
 - `p`: plot container. p[1] has the joint distribution of two state variables. to plot all combinations at once use plot(p...)
 """
-function joint_pdfs(chain, left_bounds, right_bounds, parameter_dictionary; indpairs = [[1,2], [1,3], [1,4], [2,3], [2,4], [3,4]], bins = 50)
+function joint_pdfs(chain, left_bounds, right_bounds, parameter_dictionary; indpairs = [[1,2], [1,3], [1,4], [2,3], [2,4], [3,4]], bins = 50, legend = false, color = :inferno)
         p = []
         for pair in indpairs
                 index1 = pair[1]
                 index2 = pair[2]
-                p1 = histogram2d(chain[index1, :], chain[index2, :], xlabel = parameter_dictionary[index1], ylabel = parameter_dictionary[index2], xlims = (left_bounds[index1], right_bounds[index1]), ylims = (left_bounds[index2], right_bounds[index2]), bins = bins, normalize = true, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
+                p1 = histogram2d(chain[index1, :], chain[index2, :], xlabel = parameter_dictionary[index1], ylabel = parameter_dictionary[index2], xlims = (left_bounds[index1], right_bounds[index1]), ylims = (left_bounds[index2], right_bounds[index2]), bins = bins, normalize = true, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, legend = legend, c = color)
                 push!(p, p1)
         end
         return p

@@ -3,10 +3,10 @@ include("../src/LocalOceanUQSupplementaryMaterials.jl")
 include("../scripts/utils.jl")
 include("../figure_scripts/utils.jl")
 
-generate_example = true
+generate_example = false
 generate_plot = true
 
-generate_simple_example = true
+generate_simple_example = false
 generate_simple_plot = true
 use_covariance_estimate = true
 
@@ -84,6 +84,7 @@ end
 
 ###
 # simpler example
+Random.seed!(1234)
 const μ_exact = [1.0; 2.0]
 Σ = [1 1/2; 1/2 1] .* 1.0
 iΣ = inv(Σ) .* 0.5 # for simplicity put the 1/2 factor here
@@ -128,4 +129,89 @@ if generate_simple_plot
     scatter!(μ_exact[1:1], μ_exact[2:2], shape = :star, color = :green, label = "optimal value", legend = :topleft, markersize= 15, legendfont = font("Times new roman", 13))
     display(p1)
     savefig(p1, pwd() * "/figures/simple_mcmc.pdf")
+end
+
+###
+# simpler example 2
+Random.seed!(1234)
+const μ_exact = [1.0; 2.0]
+const example_scale = 1
+Σ = [1 1/2; 1/2 1] .* example_scale
+iΣ = inv(Σ) .* 0.5 # for simplicity put the 1/2 factor here
+pdf(x) = exp( - (x-μ_exact)' * iΣ * (x-μ_exact) )
+
+initial_𝑪 = [3.0; 6.0]
+nll(𝑪) = - log(pdf(𝑪))
+
+if generate_simple_example
+    initial_𝑪 = [3.0; 6.0] * 4.0
+    nll(𝑪) = - log(pdf(𝑪))
+    # parameters for mcmc
+    nt = 10^5
+    frequency = 100
+    # define proposal matrix, 5% of default value
+    Σ_p = [0.02 0.0; 0.0 0.02] .* example_scale
+    proposal = CoreFunctionality.closure_proposal(Σ_p)
+    # now markov chain
+    filename = pwd() * "/mcmc_data/"* "simple_example_mcmc_"*string(example_scale)*".jld2"
+    CoreFunctionality.markov_chain(nll, initial_𝑪, proposal, nt,  freq = frequency, filename = filename, verbose = true)
+end
+###
+pyplot(size = (500,500))
+if generate_simple_plot
+    filename = pwd() * "/mcmc_data/"* "simple_example_mcmc_"*string(example_scale)*".jld2"
+    mcmc_data = jldopen(filename, "r")
+    chain = mcmc_data["𝑪"]
+    e1 = mcmc_data["ε"]
+    e2 = mcmc_data["proposal_ε"]
+    acceptance_rate = sum(e1 .== e2) / length(e1)
+    println("the acceptance rate was")
+    println(acceptance_rate)
+    indmin = argmin(e1)
+    close(mcmc_data)
+    pair = [1, 2]
+    index1 = pair[1]
+    index2 = pair[2]
+    bins = 250
+    bools = e1 .< minimum(e1) * 100
+    tmp_ind = argmax(bools)
+    if example_scale > 1
+        tmp_ind = 326
+    else
+        tmp_ind = 725
+    end
+    p1 = histogram2d(chain[index1, tmp_ind:end], chain[index2, tmp_ind:end], xlabel = "parameter 1", ylabel = "parameter 2", bins = bins, normalize = true, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, xlims = (-12, 13), ylims = (-10,25), color = cgrad(:blues, rev = false))
+    # another way to accomplish similar things is with
+    # marker_z = (+), color = :bluesreds
+    # see http://docs.juliaplots.org/latest/generated/plotly/#plotly-ref35-1
+    for i in 1:tmp_ind
+        ω = i / tmp_ind / 8 * 4.5
+        p1 = scatter!(chain[index1, i:i], chain[index2, i:i], xlabel = "parameter 1", ylabel = "parameter 2", bins = bins, normalize = true, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, xlims = (-12, 13), ylims = (-10,25), marker = (:hexagon, 4, 1.0, RGB(0.1,ω,1-ω), stroke(1, 1.0, :black, :dot)), label = false)
+    end
+    scatter!(chain[index1, 1:1], chain[index2, 1:1], shape = :circle, color = :blue, label = "starting value", markersize= 15)
+    scatter!(μ_exact[1:1], μ_exact[2:2], shape = :star, color = :green, label = "optimal value", legend = :topleft, markersize= 15, legendfont = font("Times new roman", 13))
+    display(p1)
+    savefig(p1, pwd() * "/figures/simple_mcmc_"*string(example_scale)*".pdf")
+end
+
+if generate_simple_plot
+    index = 1
+    a = [25, 35]
+    b = [(-12, 13), (-10,25)]
+    Δx = a[index]
+    Δy = length(chain[index, 1:end-1]) / 20
+    ratio = 1/3 * Δx / Δy
+    p2 = histogram(chain[index, 1:end-1],  bins = bins, legend = false, normalize = false, ylabel = "arbitrary", grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, aspect_ratio = ratio, xlims = b[index], ylims = (0, Δy), ticks = false)
+    savefig(p2, pwd() * "/figures/simple_mcmc_"*string(example_scale)*"_marginal_"*string(index)*".pdf")
+end
+
+if generate_simple_plot
+    index = 2
+    a = [25, 35]
+    b = [(-12, 13), (-10,25)]
+    Δx = a[index]
+    Δy = length(chain[index, 1:end-1]) / 20
+    ratio = 1/3 * Δx / Δy
+    p2 = histogram(chain[index, 1:end-1],  bins = bins, legend = false, normalize = false, ylabel = "arbitrary", grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, aspect_ratio = ratio, xlims = b[index], ylims = (0, Δy), ticks = false)
+    savefig(p2, pwd() * "/figures/simple_mcmc_"*string(example_scale)*"_marginal_"*string(index)*".pdf")
 end
