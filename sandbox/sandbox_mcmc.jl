@@ -135,7 +135,7 @@ end
 # simpler example 2
 Random.seed!(1234)
 const μ_exact = [1.0; 2.0]
-const example_scale = 1
+const example_scale = 10
 Σ = [1 1/2; 1/2 1] .* example_scale
 iΣ = inv(Σ) .* 0.5 # for simplicity put the 1/2 factor here
 pdf(x) = exp( - (x-μ_exact)' * iΣ * (x-μ_exact) )
@@ -201,7 +201,7 @@ if generate_simple_plot
     Δx = a[index]
     Δy = length(chain[index, 1:end-1]) / 20
     ratio = 1/3 * Δx / Δy
-    p2 = histogram(chain[index, 1:end-1],  bins = bins, legend = false, normalize = false, ylabel = "arbitrary", grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, aspect_ratio = ratio, xlims = b[index], ylims = (0, Δy), ticks = false)
+    p2 = histogram(chain[index, 1:end-1],  bins = bins, legend = false, normalize = false, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :none, aspect_ratio = ratio, xlims = b[index], ylims = (0, Δy), ticks = false)
     savefig(p2, pwd() * "/figures/simple_mcmc_"*string(example_scale)*"_marginal_"*string(index)*".pdf")
 end
 
@@ -212,6 +212,6 @@ if generate_simple_plot
     Δx = a[index]
     Δy = length(chain[index, 1:end-1]) / 20
     ratio = 1/3 * Δx / Δy
-    p2 = histogram(chain[index, 1:end-1],  bins = bins, legend = false, normalize = false, ylabel = "arbitrary", grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, aspect_ratio = ratio, xlims = b[index], ylims = (0, Δy), ticks = false)
+    p2 = histogram(chain[index, 1:end-1],  bins = bins, legend = false, normalize = false, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :none, aspect_ratio = ratio, xlims = b[index], ylims = (0, Δy), ticks = false)
     savefig(p2, pwd() * "/figures/simple_mcmc_"*string(example_scale)*"_marginal_"*string(index)*".pdf")
 end
