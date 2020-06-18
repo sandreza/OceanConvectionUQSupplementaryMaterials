@@ -79,7 +79,7 @@ end
 # Version 1
 pyplot(size = (500, 500))
 if generate_plot
-    const factor = 1
+    const factor = 10
     inverse_factor = true
     if inverse_factor
         filename = filename = pwd() * "/mcmc_data/" * "toy_example_i" *  string(factor) * "_mcmc.jld2"
@@ -249,7 +249,7 @@ end
 
 ###
 const factor = 10
-inverse_factor = false
+inverse_factor = true
 if inverse_factor
     filename = filename = pwd() * "/mcmc_data/" * "toy_example_i" *  string(factor) * "_mcmc.jld2"
 else
@@ -296,4 +296,74 @@ if generate_plot
         savefig(p2, pwd() * "/figures/simpler_mcmc_"*string(factor)*"_marginal_"*string(index)*".pdf")
     end
     display(p2)
+end
+
+
+###
+# gif for fun, takes a little while to run
+const factor = 10
+inverse_factor = false
+if inverse_factor
+    filename = filename = pwd() * "/mcmc_data/" * "toy_example_i" *  string(factor) * "_mcmc.jld2"
+else
+    filename = filename = pwd() * "/mcmc_data/" * "toy_example_" *  string(factor) * "_mcmc.jld2"
+end
+mcmc_data = jldopen(filename, "r")
+chain = mcmc_data["𝑪"]
+proposal_chain = mcmc_data["proposal_𝑪"]
+e1 = mcmc_data["ε"]
+e2 = mcmc_data["proposal_ε"]
+acceptance_rate = sum(e1 .== e2) / length(e1)
+println("the acceptance rate was")
+println(acceptance_rate)
+indmin = argmin(e1)
+close(mcmc_data)
+index1 = 3
+index2 = 4
+bools = e1 .< minimum(e1) * 2
+tmp_ind = argmax(bools)
+if factor > 1
+    tmp_ind = 80
+    tmp_ind = 830
+else
+    tmp_ind = 100
+    tmp_ind = 1037
+end
+if inverse_factor
+    tmp_ind = 1000
+end
+bins = 200
+Cᴿ = 0.3
+chain[4, :] *= Cᴿ
+proposal_chain[4, :] *= Cᴿ
+right_bounds[4] = 4.0
+using LinearAlgebra
+tail_ind = 10
+anim = @animate for i in 1:1:2*10^3
+    p1 = histogram2d(chain[index1, tmp_ind:end], chain[index2, tmp_ind:end], xlabel = parameter_dictionary[index1], ylabel = parameter_dictionary[index2], xlims = (left_bounds[index1], right_bounds[index1]), ylims = (left_bounds[index2], right_bounds[index2]), bins = bins, normalize = true, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, legend = false, color = cgrad(:blues, rev = false), xtickfont=font(18), ytickfont=font(18), xguidefontsize=18, yguidefontsize = 18, legendfontsize = 18)
+    # Starting value
+    scatter!(chain[index1, 1:1], chain[index2, 1:1], shape = :circle, color = :blue, label = "starting value", markersize= 15, opacity = 0.5)
+    # another way to accomplish similar things is with
+    # marker_z = (+), color = :bluesreds
+    # see http://docs.juliaplots.org/latest/generated/plotly/#plotly-ref35-1
+    ω = i / tmp_ind / 8 * 4.5
+    p1 = scatter!(chain[index1, i:i+tail_ind], chain[index2, i:i+tail_ind], xlabel = parameter_dictionary[index1], ylabel = parameter_dictionary[index2], bins = bins, normalize = true, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, xlims = (left_bounds[index1], right_bounds[index1]), ylims = (left_bounds[index2], right_bounds[index2]), marker = (:hexagon, 6, 0.5, RGB(0.0, 0.0, 1.0), stroke(0.1, 0.1, :black, :dot)), label = false)
+
+    scatter!(chain[index1, i+1+tail_ind:i+1+tail_ind], chain[index2, i+1+tail_ind:i+1+tail_ind], xlabel = parameter_dictionary[index1], ylabel = parameter_dictionary[index2], bins = bins, normalize = true, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, xlims = (left_bounds[index1], right_bounds[index1]), ylims = (left_bounds[index2], right_bounds[index2]), marker = (:hexagon, 6, 1.0, RGB(0.0, 0.0, 1.0), stroke(0.1, 0.1, :black, :dot)), label = "chain")
+    # proposal parameter
+    accepted = norm(proposal_chain[:, i+2+tail_ind] - chain[:, i+2+tail_ind]) < eps(1.0)
+    if accepted
+        color = RGB(0.0, 1.0, 0.0)
+    else
+        color = RGB(1.0, 0.0, 0.0)
+    end
+    scatter!(proposal_chain[index1, i+2+tail_ind:i+2+tail_ind], proposal_chain[index2, i+2+tail_ind:i+2+tail_ind], xlabel = parameter_dictionary[index1], ylabel = parameter_dictionary[index2], bins = bins, normalize = true, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, xlims = (left_bounds[index1], right_bounds[index1]), ylims = (left_bounds[index2], right_bounds[index2]), marker = (:hexagon, 6, 1.0, color, stroke(1, 1.0, :black, :dot)), label = "proposal")
+    # end location
+    scatter!(initial_𝑪[index1, 1:1], initial_𝑪[index2, 1:1] .* Cᴿ, shape = :star, color = :green, label = "optimal value", legend = :topright, markersize= 15, legendfont = font("Times new roman", 13), opacity = 0.5)
+end
+
+if inverse_factor
+    gif(anim, pwd() * "/" * string(factor) * "_i_scratch.gif", fps = 15)
+else
+    gif(anim, pwd() * "/" * string(factor) * "_scratch.gif", fps = 15)
 end
