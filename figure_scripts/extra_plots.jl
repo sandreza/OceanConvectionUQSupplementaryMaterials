@@ -1,7 +1,48 @@
-include("../src/LocalOceanUQSupplementaryMaterials.jl")
-include("../scripts/utils.jl")
-include("../figure_scripts/utils.jl")
+include(pwd() * "/src/LocalOceanUQSupplementaryMaterials.jl")
+include(pwd() * "/scripts/utils.jl")
+include(pwd() * "/figure_scripts/utils.jl")
 pyplot()
+##
+case = cases[1]
+# get LES
+filename = pwd() * "/LES/" * case * "_profiles.jld2"
+les = CoreFunctionality.OceananigansData(filename)
+
+# define loss functions and forward maps
+subsample = 1:1:length(les.t)
+N = 16
+Δt = 10 * 60 #seconds
+zᵖ = zeros(N)
+# define the forward map
+𝒢 = CoreFunctionality.closure_free_convection(N, Δt, les, subsample = subsample, grid = zᵖ)
+# define the loss function
+ℒ = CoreFunctionality.closure_T_nll(𝒢, les)
+# define time dependent loss function
+ℒᵗ = CoreFunctionality.closure_T_nll(𝒢, les; weight = 1, subsample = subsample, series=true, power = 2, f1 = mean, f2 = maximum )
+
+# get MCMC data
+resolution_label = "_res_" * string(N)
+filename = pwd() * "/mcmc_data/" * case * resolution_label * "_mcmc.jld2"
+mcmc_data = jldopen(filename, "r")
+chain = mcmc_data["𝑪"]
+e1 = mcmc_data["ε"]
+e2 = mcmc_data["proposal_ε"]
+acceptance_rate = sum(e1 .== e2) / length(e1)
+println("the acceptance rate was")
+println(acceptance_rate)
+indmin = argmin(e1)
+close(mcmc_data)
+
+seconds_in_a_day = 86400
+# parameters to loop over
+labels = ["Default", "Mode", "Mean", "Median"]
+default_𝑪 = [0.1, 6.33, 1.36, 3.19]
+#default_𝑪 = [0.0760809666611145; 4.342473912404762; 2.1630355831002954; 5.57111619953263] # from megachain
+optimal_𝑪 = chain[:, indmin]
+mean_𝑪 = mean(chain,dims=2)
+median_𝑪 = median(chain,dims=2)
+
+##
 parameter_list = [default_𝑪, optimal_𝑪, mean_𝑪, median_𝑪]
 plot()
 p = []
@@ -22,7 +63,7 @@ subsample_parameter = 1
 start = 1
 subsample = start:subsample_parameter:length(les.t)
 ##
-N = Nlist[1]
+N = N
 Δt = les.t[2] - les.t[1]
 zᵖ = zeros(N)
 # define the forward map
@@ -38,7 +79,7 @@ j = 1
 loss_default = ℒᵗ(𝑪)
 Tᵖ = 𝒢(𝑪)
 daystring = @sprintf("%.1f", les.t[end] ./ 86400)
-p1 = scatter!(Tᵖ[:,end], zᵖ, label = "Default", title = "t = "* daystring * " days", markersize = 6, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, markerstrokealpha = 0.0,  markerstrokewidth = 0.0, markershape = :square, aspect_ratio = 2 * Δx/Δy, markercolor = :green)
+p1 = scatter!(Tᵖ[:,end], zᵖ, label = "Reference", title = "t = "* daystring * " days", markersize = 6, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, markerstrokealpha = 0.0,  markerstrokewidth = 0.0, markershape = :square, aspect_ratio = 2 * Δx/Δy, markercolor = :green)
 
 j = 2
 𝑪 = parameter_list[j]
@@ -47,14 +88,14 @@ Tᵖ = 𝒢(𝑪)
 p1 = scatter!(Tᵖ[:,end], zᵖ, label = "Mode", title = "t = "* daystring * " days", markersize = 6, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, markerstrokealpha = 0.0,  markerstrokewidth = 0.0, markershape = :circle, aspect_ratio = 2 * Δx/Δy, markercolor = :magenta)
 
 inds = 30:length(les.t)
-p2 = plot(les.t[inds] ./ 86400, sqrt.(loss_default[inds]), legend = :bottomright, xlabel = "days", ylabel = "Error " * celsius, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, label = "Default" , color = :green)
+p2 = plot(les.t[inds] ./ 86400, sqrt.(loss_default[inds]), legend = :bottomright, xlabel = "days", ylabel = "Error " * celsius, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, label = "Reference" , color = :green)
 p2 =  plot!(les.t[inds] ./ 86400, sqrt.(loss_optimal[inds]), legend = :topleft, xlabel = "days", ylabel = "Error " * celsius, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, label = "Mode" , color = :magenta, title = "Error in Time")
 
 
 p = plot(p1, p2)
 savefig(p, pwd() * "/figures/profile_and_loss.pdf")
 
-###
+##
 
 # include("plot2.jl")
 plot()
@@ -177,7 +218,7 @@ C2 = median_values[:]
 res_string = @sprintf("%.2f ", 100/resolution[1])
 per_string = @sprintf("%.0f", (2*confidence_interval-1)* 100)
 
-p1 = plot!(N², 0 * N² .+ default_val , color = :black, linewidth = 2, label = "Default", linestyle = :dash)
+p1 = plot!(N², 0 * N² .+ default_val , color = :black, linewidth = 2, label = "Reference", linestyle = :dash)
 
 p1 = scatter!(N², C2, xlabel = "Background Stratification, N² " * itime, ylabel = names[p_index], yerror = range_values, ylims = y_range, color = :blue, markersize = 6, label = "Median ")
 

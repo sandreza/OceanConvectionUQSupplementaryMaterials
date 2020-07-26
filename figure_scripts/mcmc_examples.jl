@@ -140,8 +140,8 @@ end
 # Version 2
 pyplot(size = (500,500))
 if generate_plot
-    const factor = 10
-    inverse_factor = true
+    const factor = 1
+    inverse_factor = false
     if inverse_factor
         filename = filename = pwd() * "/mcmc_data/" * "toy_example_i" *  string(factor) * "_mcmc.jld2"
     else
@@ -161,11 +161,11 @@ if generate_plot
     bools = e1 .< minimum(e1) * 2
     tmp_ind = argmax(bools)
     if factor > 1
-        tmp_ind = 80
-        # tmp_ind = 830
+        tmp_ind_b = 80
+        tmp_ind = 830
     else
-        tmp_ind = 100
-        # tmp_ind = 1037
+        tmp_ind_b = 100
+        tmp_ind = 1037
     end
     if inverse_factor
         tmp_ind = 1000
@@ -177,13 +177,15 @@ if generate_plot
 
     p1 = histogram2d(chain[index1, tmp_ind:end], chain[index2, tmp_ind:end], xlabel = parameter_dictionary[index1], ylabel = parameter_dictionary[index2], xlims = (left_bounds[index1], right_bounds[index1]), ylims = (left_bounds[index2], right_bounds[index2]), bins = bins, normalize = true, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, legend = false, color = cgrad(:blues, rev = false), textsize = 10, xtickfont=font(18), ytickfont=font(18), xguidefontsize=18, yguidefontsize = 18, legendfontsize = 18)
     # Starting Value
-    scatter!(chain[index1, 1:1], chain[index2, 1:1], shape = :circle, color = :blue, label = "starting value", markersize= 15, opacity = 0.5)
+    scatter!(chain[index1, 1:1], chain[index2, 1:1], shape = :circle, color = :blue, label = "starting value", markersize= 15, opacity = 0.75)
     # Burn-in
-    p1 = scatter!(chain[index1, 1:tmp_ind], chain[index2, 1:tmp_ind], xlabel = parameter_dictionary[index1], ylabel = parameter_dictionary[index2], bins = bins, normalize = true, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, xlims = (left_bounds[index1], right_bounds[index1]), ylims = (left_bounds[index2], right_bounds[index2]), marker = (:hexagon, 6, 0.25, RGB(1.0, 0.30, 0.0), stroke(1, 1.0, :black, :dot)), label = "burn-in")
+    p1 = scatter!(chain[index1, 1:tmp_ind_b], chain[index2, 1:tmp_ind_b], xlabel = parameter_dictionary[index1], ylabel = parameter_dictionary[index2], bins = bins, normalize = true, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, xlims = (left_bounds[index1], right_bounds[index1]), ylims = (left_bounds[index2], right_bounds[index2]), marker = (:hexagon, 6, 0.25, RGB(1.0, 0.30, 0.0), stroke(1, 1.0, :black, :dot)), label = "burn-in")
+    # Walk to optimal
+    p1 = scatter!(chain[index1, tmp_ind_b:tmp_ind], chain[index2, tmp_ind_b:tmp_ind], xlabel = parameter_dictionary[index1], ylabel = parameter_dictionary[index2], bins = bins, normalize = true, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, xlims = (left_bounds[index1], right_bounds[index1]), ylims = (left_bounds[index2], right_bounds[index2]), marker = (:hexagon, 6, 0.25, RGB(1.0, 0.30, 0.0), stroke(1, 1.0, :black, :dot)), label = "chain")
     # To plot over burn in
     scatter!(chain[index1, 1:1], chain[index2, 1:1], shape = :circle, color = :blue, label = false, markersize= 15, opacity = 0.5)
     # Best-known optimal value
-    scatter!(initial_𝑪[index1, 1:1], initial_𝑪[index2, 1:1] .* Cᴿ, shape = :star, color = :green, label = "optimal value", legend = :topright, markersize= 15, legendfont = font("Times new roman", 13), opacity = 0.5)
+    scatter!(initial_𝑪[index1, 1:1], initial_𝑪[index2, 1:1] .* Cᴿ, shape = :star, color = :green, label = "optimal value", legend = :topright, markersize= 15, legendfont = font("Times new roman", 13), opacity = 0.75)
     display(p1)
     if inverse_factor
         savefig(p1, pwd() * "/figures/simpler_mcmc_i"* string(factor) * "_v2.pdf")
@@ -245,11 +247,70 @@ if generate_plot
         savefig(p1, pwd() * "/figures/simpler_mcmc_"* string(factor) * "_v3.pdf")
     end
 end
+###
+# version 4
+pyplot(size = (500,500))
+if generate_plot
+    const factor = 10
+    inverse_factor = false
+    if inverse_factor
+        filename = filename = pwd() * "/mcmc_data/" * "toy_example_i" *  string(factor) * "_mcmc.jld2"
+    else
+        filename = filename = pwd() * "/mcmc_data/" * "toy_example_" *  string(factor) * "_mcmc.jld2"
+    end
+    mcmc_data = jldopen(filename, "r")
+    chain = mcmc_data["𝑪"]
+    e1 = mcmc_data["ε"]
+    e2 = mcmc_data["proposal_ε"]
+    acceptance_rate = sum(e1 .== e2) / length(e1)
+    println("the acceptance rate was")
+    println(acceptance_rate)
+    indmin = argmin(e1)
+    close(mcmc_data)
+    index1 = 3
+    index2 = 4
+    bools = e1 .< minimum(e1) * 2
+    tmp_ind = argmax(bools)
+    if factor > 1
+        tmp_ind_b = 80
+        tmp_ind = 830
+    else
+        tmp_ind_b = 100
+        tmp_ind = 1037
+    end
+    if inverse_factor
+        tmp_ind = 1000
+    end
+    bins = 300
+    Cᴿ = 0.3
+    chain[4, :] *= Cᴿ
+    right_bounds[4] = 4.0
+
+    p1 = histogram2d(chain[index1, tmp_ind:end], chain[index2, tmp_ind:end], xlabel = parameter_dictionary[index1], ylabel = parameter_dictionary[index2], xlims = (left_bounds[index1], right_bounds[index1]), ylims = (left_bounds[index2], right_bounds[index2]), bins = bins, normalize = true, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, legend = false, color = cgrad(:blues, rev = false), textsize = 10, xtickfont=font(18), ytickfont=font(18), xguidefontsize=18, yguidefontsize = 18, legendfontsize = 18)
+    # Starting Value
+    scatter!(chain[index1, 1:1], chain[index2, 1:1], shape = :circle, color = :blue, label = "starting value", markersize= 15, opacity = 1.0)
+    # Burn-in
+    p1 = scatter!(chain[index1, 1:1:tmp_ind_b], chain[index2, 1:1:tmp_ind_b], xlabel = parameter_dictionary[index1], ylabel = parameter_dictionary[index2], bins = bins, normalize = true, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, xlims = (left_bounds[index1], right_bounds[index1]), ylims = (left_bounds[index2], right_bounds[index2]), marker = (:hexagon, 6, 0.75, RGB(1.0, 0.30, 0.0), stroke(1, 1.0, :black, :dot)), label = "burn-in")
+    # Walk to optimal
+    skip = 1
+    p1 = scatter!(chain[index1, tmp_ind_b:skip:tmp_ind], chain[index2, tmp_ind_b:skip:tmp_ind], xlabel = parameter_dictionary[index1], ylabel = parameter_dictionary[index2], bins = bins, normalize = true, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, xlims = (left_bounds[index1], right_bounds[index1]), ylims = (left_bounds[index2], right_bounds[index2]), marker = (:hexagon, 6, 0.35, RGB(1.0, 0.20, 0.0), stroke(1.0, 0.1, :black, :dot)), label = false)
+    # To plot over burn in
+    scatter!(chain[index1, 1:1], chain[index2, 1:1], shape = :circle, color = :blue, label = false, markersize= 15, opacity = 0.5)
+    # Best-known optimal value
+    scatter!(initial_𝑪[index1, 1:1], initial_𝑪[index2, 1:1] .* Cᴿ, shape = :star, color = :green, label = "optimal value", legend = :topright, markersize= 15, legendfont = font("Times new roman", 13), opacity = 1.0)
+    display(p1)
+    if inverse_factor
+        savefig(p1, pwd() * "/figures/simpler_mcmc_i"* string(factor) * "_v4.pdf")
+    else
+        savefig(p1, pwd() * "/figures/simpler_mcmc_"* string(factor) * "_v4.pdf")
+    end
+end
 
 
 ###
+# marginals
 const factor = 10
-inverse_factor = true
+inverse_factor = false
 if inverse_factor
     filename = filename = pwd() * "/mcmc_data/" * "toy_example_i" *  string(factor) * "_mcmc.jld2"
 else
@@ -273,7 +334,7 @@ if generate_plot
     bins = 60
     index = 3
     Δx = right_bounds[index] - left_bounds[index]
-    Δy = 7
+    Δy = 1.5
     ratio = 1/3 * Δx / Δy
     p2 = histogram(chain[index, tmp_ind:end-1],  bins = bins, legend = false, normalize = true, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, aspect_ratio = ratio, xlims = (left_bounds[index], right_bounds[index]), ylims = (0, Δy), ticks = false, edges = false, linewidth = 0.00)
     display(p2)
@@ -285,9 +346,10 @@ if generate_plot
 end
 
 if generate_plot
+    bins = 60
     index = 4
     Δx = right_bounds[index] - left_bounds[index]
-    Δy = 5
+    Δy = 2.0
     ratio = 1/3 * Δx / Δy
     p2 = histogram(chain[index, tmp_ind:end-1],  bins = bins, legend = false, normalize = true, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, aspect_ratio = ratio, xlims = (left_bounds[index], right_bounds[index]), ylims = (0, Δy), ticks = false, linewidth = 0.0)
     if inverse_factor
@@ -339,7 +401,8 @@ proposal_chain[4, :] *= Cᴿ
 right_bounds[4] = 4.0
 using LinearAlgebra
 tail_ind = 10
-anim = @animate for i in 1:1:2*10^3
+final_index = 2*10^3
+anim = @animate for i in 1:1:final_index
     p1 = histogram2d(chain[index1, tmp_ind:end], chain[index2, tmp_ind:end], xlabel = parameter_dictionary[index1], ylabel = parameter_dictionary[index2], xlims = (left_bounds[index1], right_bounds[index1]), ylims = (left_bounds[index2], right_bounds[index2]), bins = bins, normalize = true, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, legend = false, color = cgrad(:blues, rev = false), xtickfont=font(18), ytickfont=font(18), xguidefontsize=18, yguidefontsize = 18, legendfontsize = 18)
     # Starting value
     scatter!(chain[index1, 1:1], chain[index2, 1:1], shape = :circle, color = :blue, label = "starting value", markersize= 15, opacity = 0.5)
@@ -359,7 +422,7 @@ anim = @animate for i in 1:1:2*10^3
     end
     scatter!(proposal_chain[index1, i+2+tail_ind:i+2+tail_ind], proposal_chain[index2, i+2+tail_ind:i+2+tail_ind], xlabel = parameter_dictionary[index1], ylabel = parameter_dictionary[index2], bins = bins, normalize = true, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, xlims = (left_bounds[index1], right_bounds[index1]), ylims = (left_bounds[index2], right_bounds[index2]), marker = (:hexagon, 6, 1.0, color, stroke(1, 1.0, :black, :dot)), label = "proposal")
     # end location
-    scatter!(initial_𝑪[index1, 1:1], initial_𝑪[index2, 1:1] .* Cᴿ, shape = :star, color = :green, label = "optimal value", legend = :topright, markersize= 15, legendfont = font("Times new roman", 13), opacity = 0.5)
+    scatter!(initial_𝑪[index1, 1:1], initial_𝑪[index2, 1:1] .* Cᴿ, shape = :star, color = :green, label = "optimal value", legend = :topright, markersize= 15, legendfont = font("Times new roman", 13), opacity = 0.5, title = string(i /final_index) * "fraction complete")
 end
 
 if inverse_factor

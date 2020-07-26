@@ -1,8 +1,7 @@
-include("../src/LocalOceanUQSupplementaryMaterials.jl")
-include("../scripts/utils.jl")
-include("../figure_scripts/utils.jl")
+include(pwd() * "/scripts/utils.jl")
+include(pwd() * "/figure_scripts/utils.jl")
 # uncertainty propagation figures
-
+# http://docs.juliaplots.org/latest/generated/colorschemes/
 display_plot = false
 save_figures = true
 pyplot()
@@ -31,13 +30,13 @@ close(domain_data)
 max_ind = length(h1)
 
 mat = uq_prop_mat(h1, index = max_ind-20)
-cmap = heatmap(ϕrange, zᵖ, log.(mat')/log(10),  color =:fire, background_color= :white, xlabel = "Temperature " * celsius, clims = (-5,-1.0), title="Posterior Ensemble", ylims = (-80,0), xlims = (19.2,19.5), grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, yaxis = false, left_margin = 10mm);
+cmap = heatmap(ϕrange, zᵖ, log.(mat')/log(10),  color =cgrad(:Blues_9, rev = false), background_color= :white, xlabel = "Temperature " * celsius, clims = (-5,-0.0), title="Posterior Ensemble", ylims = (-80,0), xlims = (19.2,19.5), grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, yaxis = false, left_margin = 10mm);
 if display_plot
     display(cmap)
 end
 
 matp = uq_prop_mat(h1p, index = max_ind-20)
-cmap_prior = heatmap(ϕrange, zᵖ, log.(matp')/log(10),  color =:fire, background_color= :white, xlabel = "Temperature " * celsius, ylabel = "Depth [m]", clims = (-5,-1.0), title= "Prior Ensemble", ylims = (-80,0), xlims = (19.2,19.5), grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, colorbar = false);
+cmap_prior = heatmap(ϕrange, zᵖ, log.(matp')/log(10),  color =color =cgrad(:Blues_9, rev = false), background_color= :white, xlabel = "Temperature " * celsius, ylabel = "Depth [m]", clims = (-5,-0.0), title= "Prior Ensemble", ylims = (-80,0), xlims = (19.2,19.5), grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, colorbar = false);
 if display_plot
     display(cmap_prior)
 end

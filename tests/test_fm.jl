@@ -2,12 +2,12 @@ include("../src/LocalOceanUQSupplementaryMaterials.jl")
 include("../scripts/utils.jl")
 using Plots, Printf, JLD2
 
-animation = false
+animation = true
 optimal = true
 mega_chain_median = false
 # Get LES data
 wd = pwd()
-case = cases[34]
+case = cases[18]
 filename = wd * "/LES/" * case * "_profiles.jld2"
 les = CoreFunctionality.OceananigansData(filename)
 
@@ -73,6 +73,11 @@ p1 = plot( Tˢ , z, label = "LES", legend = :bottomright , xlabel= "Temperature 
 scatter!( Tᵖ , zᵖ, label = "KPP", legend = :bottomright , xlabel= "Temperature [C]", ylabel = "Depth [m]", title = "Vertical Profile at t = " * days * " days", xlims = (minT,maxT), grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box)
 display(p1)
 
+###
+3+3
+
+###
+println("another cell")
 ###
 # Test other forward map
 
