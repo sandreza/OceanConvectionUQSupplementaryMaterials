@@ -97,7 +97,32 @@ p2 =  plot!(les.t[inds] ./ 86400, sqrt.(loss_optimal[inds]), legend = :topleft, 
 p = plot(p1, p2)
 end
 gif(anim, pwd() * "/error_animation.gif", fps = 15)
+##
+# plot LES data and Initial Condition
+xup = 20.01
+xdown = 19.2
+yup = 0.0
+ydown = -75
+Δy = abs(yup-ydown)
+Δx = abs(xup -xdown)
 
+case = cases[1]
+filename = pwd() * "/LES/" * case * "_profiles.jld2"
+les = CoreFunctionality.OceananigansData(filename)
+
+
+p1 = plot(20 .+ les.z .* 0.01, les.z, label = "time 0",
+ylabel = "depth [m]", xlabel = "Temperature " * celsius, 
+xlims = (xdown, xup), ylims = (ydown, yup), color = :green, 
+aspect_ratio = 2 * Δx/Δy, grid = true, gridstyle = :dash, 
+gridalpha = 0.25, framestyle = :box, linewidth = 3)
+p1 = plot!(les.T[:,end], les.z, label = "time t", legend = :bottomright, 
+ylabel = "depth [m]", xlabel = "Temperature " * celsius, 
+xlims = (xdown, xup), ylims = (ydown, yup), color = :blue, 
+aspect_ratio = 2 * Δx/Δy, grid = true, gridstyle = :dash, 
+gridalpha = 0.25, framestyle = :box, linewidth = 3)
+display(p1)
+savefig(p1, pwd() * "/initial_and_final.pdf")
 ##
 anim = @animate for i in 30:10:length(les.t)
 xup = maximum(les.T[:,i]) + 0.04
