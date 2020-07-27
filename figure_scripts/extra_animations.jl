@@ -311,3 +311,145 @@ anim = @animate for i in 1:1:final_index
 end
 gif(anim, pwd() * "/rwmcmc_example.gif", fps = 60)
 mp4(anim, pwd() * "/rwmcmc_example.mp4", fps = 60)
+
+##
+# Mixed layer depth animations
+
+using JLD2
+include(pwd() * "/src/LocalOceanUQSupplementaryMaterials.jl")
+include(pwd() * "/scripts/utils.jl")
+include(pwd() * "/figure_scripts/utils.jl")
+
+# les analysis
+# derivative function
+function δ(z, Φ)
+    m = length(Φ)-1
+    Φz = ones(m)
+    for i in 1:m
+        Φz[i] = (Φ[i+1]-Φ[i])/(z[i+1]-z[i])
+    end
+    return Φz
+end
+
+
+
+animation = false
+#case = cases[18]
+case = "dns_old"
+# case = "dns2"
+case = "rdns"
+case = "rdns_2"
+case = "dns"
+case = cases[1]
+newcases = ["dns_old", "dns_2", "ndns", "rdns", "rdns_2"]
+filename = pwd() * "/LES/" * case * "_profiles.jld2"
+les = CoreFunctionality.OceananigansData(filename)
+
+# get vertical shear
+les_data = jldopen(filename, "r")
+les_keys = keys(les_data)
+timeseries_keys = keys(les_data["timeseries"]["t"])
+list = keys(les_data["timeseries"])
+timeseries_keys = keys(les_data["timeseries"]["t"])
+# size of arrays
+Nz = length(collect(les_data["grid"]["zC"]))
+Nt = length(timeseries_keys)
+vshear = zeros(Nz,Nt)
+# get vertical shear
+if case in cases2
+    println("extracting vertical shear")
+    for j in 1:Nt
+        # Fields
+        key = timeseries_keys[j]
+        @. vshear[:,j] = les_data["timeseries"]["vshear"][key][2:(end-1)]
+    end
+elseif case in newcases
+    println("extracting vertical shear")
+    for j in 1:Nt
+        # Fields
+        key = timeseries_keys[j]
+        @. vshear[:,j] = les_data["timeseries"]["vshear"][key][2:(end-1)]
+    end
+else
+    nothing
+end
+close(les_data)
+
+Qᵇ = les.α * les.g * les.top_T
+N² = les.α * les.g * les.bottom_T
+Nt = length(les.t)
+
+maxww = maximum(les.ww, dims =1)[:]
+h = randn(Nt)
+h1 = rand(Nt)
+h2 = randn(Nt)
+ΔB = randn(Nt)
+ΔB2 = randn(Nt)
+Vᵗ = randn(Nt)
+we = randn(Nt)
+ww_top = randn(Nt)
+ww_base = randn(Nt)
+ww_star = randn(Nt)
+Nᵉ = randn(Nt)
+TKE_base = randn(Nt)
+ΔTKE = randn(Nt)
+𝒮 = randn(Nt)
+for i in 1:Nt
+    B = les.α * les.g * les.T[:,i]
+    Bz = δ(les.z, B)
+    mBz = maximum(Bz)
+    hⁱ = argmin(les.wT[:,i])
+    hⁱ = argmax(Bz)
+    h[i] = -les.z[hⁱ]
+    regind = maximum([1, hⁱ-10])
+    ΔB[i] = mean(B[(end-10):end]) - B[hⁱ]
+    Vᵗ[i] = ( h[i] * ΔB[i] ) / ( h[i] * sqrt(N²)  * (h[i] * Qᵇ)^(1/3) )
+    we[i] = -(les.α * les.g * les.wT[hⁱ,i]) ./ ΔB[i]
+
+    Nᵉ[i] = sqrt(mBz)
+    tt = (2*N² + mBz)/3
+    bools = Bz .> tt
+    bools2 = Bz .> (N² + 0)/4
+    ind = collect(1:length(Bz))
+    cand = ind[bools]
+    zA = (les.z[1:(end-1)] + les.z[2:end] )./2
+    bools3 = zeros(Bool,length(bools))
+    @. bools3[hⁱ:end] = bools[hⁱ:end]
+    h2[i] = -minimum(zA[bools])
+    h1[i] = -maximum(zA[bools2])
+    h1ⁱ = argmax(zA[bools])
+    h2ⁱ = argmin(zA[bools])
+    TKE_base[i] = les.uu[hⁱ,i] + les.vv[hⁱ,i] + les.ww[hⁱ,i]
+    TKE_base[i] = maximum(les.uu[:,i] + les.vv[:,i] + les.ww[:,i])
+    # TKE_base[i] = les.uu[h1ⁱ,i] + les.vv[h1ⁱ,i] + les.ww[h1ⁱ,i]
+    ΔTKE[i] = les.uu[h1ⁱ,i] + les.vv[h1ⁱ,i] + les.ww[h1ⁱ,i] - les.uu[h2ⁱ,i] + les.vv[h2ⁱ,i] + les.ww[h2ⁱ,i]
+    𝒮[i] = maximum(vshear[1:h1ⁱ, i])
+    ww_top[i] = les.ww[h1ⁱ, i]
+    ww_base[i] = les.ww[h2ⁱ, i]
+    ww_star[i] = (Qᵇ * h1[i])^(2/3)
+    ΔB2[i] = mean(B[(end-10):end]) - B[h2ⁱ]
+end
+field = les.T
+max_field = maximum(field)
+min_field = minimum(field)
+animation = false
+end_ind = floor(Int, Nt/1)
+begin_ind = 30
+anim = @animate for i in begin_ind:10:end_ind
+    ϕ = field[:,i]
+    time_string = @sprintf("%.1i", les.t[i] ./ 86400)
+    p1 = plot(ϕ, les.z, legend = :bottomright, xlims = (min_field, max_field), title = "Day = " * time_string, label = "LES", color = :blue, linewidth = 3)
+    #plot!(max_field .+ (les.z .* (max_field - min_field)/les.L), -h[i] .+ (les.z .* 0), label = "h_e", linewidth = 2 )
+    #plot!(max_field .+ (les.z .* (max_field - min_field)/les.L), -h1[i] .+ (les.z .* 0), label = "h_1", linewidth = 2 )
+    plot!(max_field .+ (les.z .* (max_field - min_field)/les.L), -h2[i] .+ (les.z .* 0), label = "h", linewidth = 2, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box , ylabel = "Depth [meters]", xlabel = "Temperature [Celcius]", color = :red)
+    e_field = @. les.α * les.g * les.wT[:,i] / Qᵇ * (max_field - min_field) ./ 2 + (min_field + max_field )/2
+    #plot!( e_field, les.z,  label = "bouyancy flux")
+    #plot!( 0 .* les.z .+ (min_field + max_field )/2 , les.z,  label = "zero bouyancy flux", legend = false)
+    t = les.t[begin_ind:30:end_ind]
+    p2 = scatter(t ./ 86400, sqrt.(t .* Qᵇ / N² * 3.02), marker = :square, color = :green, label = "Fit", legend = :bottomright, xlabel = "Day", ylabel = "h [meters]", title = "Growth in Time")
+    p2 = plot!(les.t[begin_ind:i] ./ 86400 , h2[begin_ind:i], label = "LES", color  = :red, grid = true, gridstyle = :dash, gridalpha = 0.25, framestyle = :box, linewidth = 3)
+    p = plot(p1,p2)
+    display(plot(p1, p2))
+end
+gif(anim, pwd() * "/depth_growth_example.gif", fps = 60)
+mp4(anim, pwd() * "/depth_growth_example.mp4", fps = 30)
