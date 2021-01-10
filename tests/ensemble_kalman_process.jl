@@ -2,13 +2,19 @@
 
 include(pwd() * "/tests/parameter_distributions.jl")
 
-function run_eki!(ekiobj, N_iter, G, g_ens, N_ens)
+function run_eki!(ekiobj, N_iter, G, g_ens, N_ens, prior)
     @inbounds for i in 1:N_iter
         params_i = ekiobj.u[end]
         # g_ens = hcat([G(params_i[i,:]) for i in 1:N_ens]...)'
-        @inbounds for j in 1:N_ens
-            g_ens[j, :] = G(params_i[i,:])
+        for j in 1:N_ens
+        gvals = G(check[j,:])
+        nancheck = any(isnan.(gvals))
+        if nancheck
+            newchoice = construct_initial_ensemble(prior, 1)'
+            gvals = G(newchoice)
         end
+        g_ens[j, :] = gvals
+    end
         update_ensemble!(ekiobj, g_ens)
     end
 end
@@ -16,7 +22,7 @@ end
 function run_eki!(ekiobj, N_iter, G, N_ens)
     @inbounds for i in 1:N_iter
         params_i = ekiobj.u[end]
-        g_ens = hcat([G(params_i[i,:]) for i in 1:N_ens]...)'
+        g_ens = hcat([G(params_i[j,:]) for j in 1:N_ens]...)'
         update_ensemble!(ekiobj, g_ens)
     end
 end

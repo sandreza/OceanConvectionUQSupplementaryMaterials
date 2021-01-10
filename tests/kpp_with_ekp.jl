@@ -30,11 +30,11 @@ subsample = start:2:length(les.t)
 ℒ = CoreFunctionality.closure_T_nll(𝒢, les; weight = 1, subsample = subsample, series=false, power = 2, f1 = mean, f2 = maximum )
 
 # h 
-params = [0.1, 6.33, 3*1.36, 3.19*2]
+params = [0.1, 6.33, 1.36, 3.19]
 ℒ(params)
 
+G(params) = [ℒ(params)]
 ##  EKP part
-
 rng_seed = 41
 Random.seed!(rng_seed)
 
@@ -46,37 +46,51 @@ noise_level =  1e-8
 Γy = noise_level * Matrix(I, n_obs, n_obs) 
 noise = MvNormal(zeros(n_obs), Γy)
 
-# Loss Function (unique minimum)
-function G(u)
-    return [sqrt((u[1]-1)^2 + (u[2]+1)^2)]
-end
-
 # Loss Function Minimum
-u_star = [1.0, -1.0]
-y_obs  = G(u_star) + 0 * rand(noise) 
+y_obs  = Γy[1,:]
 
 # Define Prior
-prior_distns = [Parameterized(Normal(0., sqrt(1))),
-                Parameterized(Normal(-0., sqrt(1)))]
-constraints = [[no_constraint()], [no_constraint()]]
-prior_names = ["u1", "u2"]
+bounds = [(0,1), (0,10), (0,8), (0,6)]
+prior_distns = [Parameterized(Uniform(bound...)) for bound in bounds]
+constraints = [[bounded(bound...)] for bound in bounds]
+# contraints = [[no_constraint()] for bound in bounds]
+prior_names = ["cs", "nl", "kap", "ch"]
 prior = ParameterDistribution(prior_distns, constraints, prior_names)
 prior_mean = reshape(get_mean(prior),:)
 prior_cov = get_cov(prior)
 
 # Calibrate
-N_ens = 50  # number of ensemble members
-N_iter = 20 # number of EKI iterations
-initial_ensemble = construct_initial_ensemble(prior, N_ens;
-                                                rng_seed=rng_seed)
-
-ekiobj = EnsembleKalmanProcess(initial_ensemble,
-                    y_obs, Γy, Inversion())
+N_ens = 1000  # number of ensemble members
+N_iter = 1 # number of EKI iterations
+initial_ensemble = construct_initial_ensemble(prior, N_ens; rng_seed=rng_seed)
+initial_losses = [G(initial_ensemble[i,:])[1] for i in 1:N_ens]
+current_noise = minimum(initial_losses)
+parameters = initial_ensemble
+# y_obs .= current_noise
+obs_mean = y_obs
+obs_noise_cov = Γy
+ekiobj = EnsembleKalmanProcess(initial_ensemble, y_obs, Γy, Inversion())
 ##
 g_ens = zeros(size(ekiobj.u[1])[1], size(G(ekiobj.u[1][1,:]))[1])
 
-
 tic = time()
-run_eki!(ekiobj, N_iter, G, g_ens, N_ens)
+run_eki!(ekiobj, N_iter, G, g_ens, N_ens, prior)
 toc = time()
-println(tic-tic)
+println(toc-tic)
+
+##
+gr(size = (300,300))
+index1 = 1
+index2 = 2
+for i in eachindex(ekiobj.u)
+    p = plot(ekiobj.u[i][:,index1], ekiobj.u[i][:,index2], seriestype=:scatter, xlims = bounds[index1], ylims = bounds[index2])
+    display(p)
+    sleep(0.1)
+end
+
+##
+
+before_fail = ekiobj.u[12]
+## start of fail 
+check = ekiobj.u[12]
+minimum(check[:])
