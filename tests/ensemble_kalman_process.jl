@@ -27,8 +27,6 @@ function run_eki!(ekiobj, N_iter, G, N_ens)
     end
 end
 
-
-
 abstract type Process end
 
 """
