@@ -1,3 +1,4 @@
+using Random, Distributions, LinearAlgebra
 # numerical gradient
 function gradient(L, params; δ = 1e-4 .* collect(1:length(params)))
     ∇L = zeros(length(params))
@@ -10,6 +11,36 @@ function gradient(L, params; δ = 1e-4 .* collect(1:length(params)))
     return ∇L  
 end
 
+# Define Method structs
+struct RandomPlugin{S,T,V,U}
+    priors::S
+    fcalls::T
+    seed::V
+    progress::U
+end
+
+function RandomPlugin(priors, fcalls::Int; seed = 1234, progress = true)
+    return RandomPlugin(priors, fcalls, 1234, true)
+end
+
+struct RandomLineSearch{I, T, B}
+    linesearches::I
+    linelength::I
+    linebounds::T
+    progress::B
+    seed::I
+end
+
+function RandomLineSearch(linesearches, linelength)
+    return RandomLineSearch(linesearches, linelength, (-0.1,1), true, 1234)
+end
+function RandomLineSearch(; linesearches = 10, linelength = 10, linebounds = (-0.1,1), progress = true, seed = 1234)
+    return RandomLineSearch(linesearches, linelength, linebounds, progress, seed)
+end
+
+# Define Helper functions
+
+# RandomPlugin
 function priorloss(ℒ, fcalls, priors; seed = 1234, progress = true)
     Random.seed!(seed)
     losses = []
@@ -26,31 +57,12 @@ function priorloss(ℒ, fcalls, priors; seed = 1234, progress = true)
     return losses, vals
 end
 
-# Define Method structs
-struct RandomPlugin{S,T,V,U}
-    priors::S
-    fcalls::T
-    seed::V
-    progress::U
-end
-
-function RandomPlugin(priors, fcalls::Int; seed = 1234, progress = true)
-    return RandomPlugin(priors, fcalls, 1234, true)
-end
-
-scruct LineSearch
-
-end
-
-# Define Helper functions
-
-# RandomPlugin
-
 # LineSearch
-function randomlinesearch(ℒ, ∇ℒ, params; linesearches = 10, linelength = 10, linebounds = (-0.1, 1.0), progress = true, seed = 1234)
+function randomlinesearch(ℒ, ∇ℒ, bparams; linesearches = 10, linelength = 10, linebounds = (-0.1, 1.0), progress = true, seed = 1234)
+    params = copy(bparams)
     Random.seed!(seed)
     for i in 1:linesearches
-        αs = rand(Uniform(linebounds...), linelength)
+        αs = [rand(Uniform(linebounds...), linelength-1)..., 0.0]
         ∇L = ∇ℒ(params) 
         LS = [ℒ(params - α * ∇L) for α in αs]
         b = argmin(LS)
@@ -90,20 +102,35 @@ function optimize(ℒ, method::RandomPlugin; history = false, printresult = true
 end
 optimize(ℒ, initialguess, method::RandomPlugin; history = false, printresult = true) = optimize(ℒ, method::RandomPlugin; history = false, printresult = true)
 
+function optimize(ℒ, ∇ℒ, params, method::RandomLineSearch; history = false, printresult = true)
+    bestparams = randomlinesearch(ℒ, ∇ℒ, params; linesearches = method.linesearches,
+                    linelength = method.linelength,
+                    linebounds = method.linebounds, 
+                    progress = method.progress, 
+                    seed = method.seed)
+    return bestparams
+end
+
 ## Example
+# loss function
+loss(x) = (x[1] - 1)^2 + (x[2] - 2)^2 + (x[3] - 3)^2 + (x[4]-4)^2
+
+# First construct global search
 # Create Prior
 lower = [0.0, 0.0, 0.0,  0.0]
-upper = [1.0, 8.0, 6.0, 5.0/0.3]
+upper = [2.0, 3.0, 4.0,  5.0]
 priors = Uniform.(lower, upper)
 # Determine number of function calls
-functioncalls = 212
-
+functioncalls = 100
 # Define Method
 method = RandomPlugin(priors, functioncalls)
-minparam = optimize(ℒ, method)
+# Optimize
+minparam = optimize(loss, method)
 
-# gradient
-∇ℒ(params) = gradient(ℒ, params)
-∇ℒ(params)
+# Next do gradient descent
+# construct numerical gradient
+∇loss(params) = gradient(loss, params)
+# optimize choosing minimum from the global search for refinement
 params = minparam
-bparams = randomlinesearch(ℒ, ∇ℒ, params)
+method  = RandomLineSearch(linebounds = (0, 1e-0/norm(∇loss(params))), linesearches = 20)
+bestparam = optimize(loss, ∇loss, params, method)
