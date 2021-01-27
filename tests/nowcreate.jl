@@ -1,6 +1,6 @@
 using Random, Distributions, LinearAlgebra
 # numerical gradient
-function gradient(L, params; δ = 1e-4 .* collect(1:length(params)))
+function gradient(L, params; δ = 1e-4 .* ones(length(params)))
     ∇L = zeros(length(params))
     e = I + zeros(length(params), length(params))
     Lcurrent = L(params)
