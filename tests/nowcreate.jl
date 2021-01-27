@@ -121,7 +121,7 @@ lower = [0.0, 0.0, 0.0,  0.0]
 upper = [2.0, 3.0, 4.0,  5.0]
 priors = Uniform.(lower, upper)
 # Determine number of function calls
-functioncalls = 100
+functioncalls = 1000
 # Define Method
 method = RandomPlugin(priors, functioncalls)
 # Optimize
